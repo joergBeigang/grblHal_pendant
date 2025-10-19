@@ -20,16 +20,16 @@ void setup() {
   pinMode(ENCODER_B, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(ENCODER_A), encoderISR, CHANGE);
   // wifi setup
-  WiFi.begin(ssid, password);
-  Serial.print("Connecting to WiFi...");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
+  // WiFi.begin(ssid, password);
+  // Serial.print("Connecting to WiFi...");
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   delay(500);
+  //   Serial.print(".");
+  // }
   Serial.println(" connected!");
   // websocket client setup
-  webSocket.begin("192.168.4.123", 81, "/"); // IP, port, URL
-  webSocket.onEvent(webSocketEvent);
+  // webSocket.begin("192.168.4.123", 81, "/"); // IP, port, URL
+  // webSocket.onEvent(webSocketEvent);
 
 
 }

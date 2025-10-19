@@ -41,12 +41,11 @@ void encoderOut() {
     return;  // No change in position
     }
   float difference = lastPos - encoderPos;
-  // Serial.println(difference);
-  float mm = (difference/float(PULSES_PER_REVOLUTION))*float(MM_PER_REVOLUTION);
+  float mm = (difference/(float(PULSES_PER_REVOLUTION)*2))*float(MM_PER_REVOLUTION);
   if (abs(mm) > shortestMove){
     String cmd = calculateCmd(mm);
-    Serial.print(encoderPos);
-    Serial.println(cmd);   
+    Serial.println(difference);
+    Serial.println(cmd);
     webSocket.sendTXT(cmd);
   }
   lastPos = encoderPos;
@@ -55,7 +54,7 @@ void encoderOut() {
 
 // builds the command with correct feedrate
 String calculateCmd(float mm){
-  float feed = mm * 600.0;
+  float feed = mm * (60000/float(interval));
       String cmd = "$J=G91 ";
       cmd += jogAxis;
       cmd += mm;
