@@ -1,0 +1,18 @@
+
+# Arduino/ESP32 build output
+/build/
+/*.elf
+/*.bin
+/*.hex
+/*.map
+/*.eep
+/*.elf
+/*.ino.*.o
+/*.ino.*.d
+/*.a
+
+# VSCode settings
+.vscode/
+
+# PlatformIO build files (if ever used)
+.pio/
