@@ -47,7 +47,7 @@ void encoderOut() {
     String cmd = calculateCmd(mm);
     Serial.print(encoderPos);
     Serial.println(cmd);   
-    // Serial.println(mm,3);   
+    webSocket.sendTXT(cmd);
   }
   lastPos = encoderPos;
 }
@@ -61,6 +61,7 @@ String calculateCmd(float mm){
       cmd += mm;
       cmd += " F";
       cmd += feed;
+      cmd += "\n";
   return(cmd);
 }
 
