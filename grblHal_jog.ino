@@ -1,46 +1,56 @@
-#include <WiFi.h>
-#include <config.h>
-#include <WebSocketsClient.h>
-#include <encoder.h>
-#include <web_socket.h>
+#include "config.h"
+#include "encoder.h"
 
-
-// #include <encoder.ino>
-unsigned long previousMillis = 0;  // will store last time encoder was read
-WebSocketsClient webSocket;
-
+volatile int active = 0;           // Volatile for ISR access
+const int buttonPin = 20;  
+int buttonState = 0;    
+int sent = 0;
+// send real time command 0x8B to enable/disable uart command
+void toggleEnable(){
+  uint8_t byteToSend = 0x8B;
+  Serial1.write(byteToSend); // sends exactly one byte
+  Serial.write(byteToSend); // sends exactly one byte
+  Serial.println("hex");
+}
 
 
 
 void setup() {
-  // Initialize rotary encoder
-  Serial.begin(115200);  // Match Serial Monitor to 115200
-  // rotrary encoder for jog
-  pinMode(ENCODER_A, INPUT_PULLUP);  // Prevent floating pins
+  Serial.begin(115200);
+  Serial1.begin(115200, SERIAL_8N1); // UART0: TX=GP0, RX=GP1
+
+  pinMode(ENCODER_A, INPUT_PULLUP);
   pinMode(ENCODER_B, INPUT_PULLUP);
+  pinMode(buttonPin, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  lastA = digitalRead(ENCODER_A);
+  lastB = digitalRead(ENCODER_B);
+
   attachInterrupt(digitalPinToInterrupt(ENCODER_A), encoderISR, CHANGE);
-  // wifi setup
-  // WiFi.begin(ssid, password);
-  // Serial.print("Connecting to WiFi...");
-  // while (WiFi.status() != WL_CONNECTED) {
-  //   delay(500);
-  //   Serial.print(".");
-  // }
-  Serial.println(" connected!");
-  // websocket client setup
-  // webSocket.begin("192.168.4.123", 81, "/"); // IP, port, URL
-  // webSocket.onEvent(webSocketEvent);
-
-
+  attachInterrupt(digitalPinToInterrupt(ENCODER_B), encoderISR, CHANGE);
 }
 
-
 void loop() {
-  webSocket.loop();
-  // read rotary encoder every .1 second
-   unsigned long currentMillis = millis();
-   if (currentMillis - previousMillis >= interval) {
-    encoderOut();
-    previousMillis = currentMillis;
+  buttonState = digitalRead(buttonPin);
+   // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
+
+  if (buttonState == LOW) {
+    // turn LED on:
+    if (sent == 0){
+      toggleEnable();
+      sent = 1;
     }
+  } else {
+    // turn LED off:
+    if (sent == 1){
+    sent = 0;
+    }
+  }
+  
+  readJogEncoder();
+  
+  if (Serial1.available()) {
+    char c = Serial1.read();
+    Serial.print(c);  // forward UART data to USB Serial
+  }
 }
