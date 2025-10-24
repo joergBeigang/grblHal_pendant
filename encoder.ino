@@ -79,7 +79,7 @@ void encoderOut() {
     Serial.println(cmd);
     // wsClient.sendTXT(cmd);
     // Serial1.write(cmd.c_str(), cmd.length());
-    Serial1.print(cmd);
+    Serial2.print(cmd);
   }
   lastPos = encoderPos;
 }
