@@ -17,4 +17,7 @@
 
 // Jogging joyustick
 #define JOY_X_PIN 2  // GP26, ADC0
-#define JOY_y_PIN 26
+#define JOY_Y_PIN 15
+
+#define JOY_MAX_FEED 3000
+

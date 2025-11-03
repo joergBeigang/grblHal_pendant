@@ -1,3 +1,4 @@
+#include <math.h>
 #include "config.h"
 #include "encoder.h"
 #include "parser.h"
@@ -5,8 +6,8 @@
 volatile int active = 0;           // Volatile for ISR access
 const int buttonPin = 20;  
   
-float joyXCenter = 0.62; // center value for X axis
-float joyYCenter = 0.62; // center value for Y axis
+int joyXCenter = 1284;
+int joyYCenter = 1744;
 float joyXMax = 0.6; // max value for X axis
 float joyYMin = 0.85; // min value for Y axis
   
@@ -42,26 +43,52 @@ void setup() {
 
   
 void readJoystick(){
-    int xValueRaw = analogRead(JOY_X_PIN);
-    int yValue = analogRead(JOY_y_PIN);
-    float xValue = (float(xValueRaw) / 2048) - joyXCenter;
-    float xValueMapped = mapJoystickValue(xValue, 0.6, 0.85, 0.15);
-    float xValueNormalized = normalize((xValueMapped), 0.15, 1.0);
-    float xValueEased = ease_in_blend(xValueNormalized, 0.8);
-    Serial.print("mapped");
-    Serial.println(xValueMapped);
-    Serial.print("normalized");
-    Serial.println(xValueNormalized);
-    
-    Serial.print("eased");
-    Serial.println(xValueEased);
+    float valueX = prepareJoystickValue(analogRead(JOY_X_PIN), .25, .31, .1,joyXCenter, .8);
+    float valueY = prepareJoystickValue(analogRead(JOY_Y_PIN), .39, .48, .1,joyYCenter, .8);
+    float vec[3] = {valueX, valueY, 0.0};
+    float mag = magnitude(vec, 3);
+    String cmd = jog_build_cmd(valueX, valueY, 0.0, mag);
+    Serial.println(cmd);
+
+    Serial.print("X");
+    Serial.println(valueX);
+    Serial.print("Y");
+    Serial.println(valueY);
 
 
   }
 
+
+// compute the magnitude of a 2D or 3D vector
+float magnitude(const float *v, int n) {
+    float sum = 0.0f;
+    for (int i = 0; i < n; i++) {
+        sum += v[i] * v[i];
+    }
+    return sqrtf(sum);
+}
+
+/* 
+ * pepare joystick value by mapping, normalizing and easing
+ * uvalue, the raw value read by alanogRead
+ * minVal, normalized max value of the joystick reading
+ * maxVal, normalized min value of the joystick reading
+ * centerZone, deadzone around center position
+ * blend, amount of easing blend (between linear and squared - 0 - 1)
+ */
+float prepareJoystickValue(float value, float minVal, float maxVal, float centerZone, float center, float blend){
+    float centerNormalized = float(center) / 4096;
+    value= (float(value) / 4096) - centerNormalized;
+    value = mapJoystickValue(value, minVal, maxVal, centerZone);
+    value = normalizeJoystickValue((value), centerZone, 1.0);
+    value = ease_in_blend(value, blend);
+    return value;
+
+}
+
 // normalize the joystick value in order to let it start from 0 even when 
 // the center bit is cut off
-float normalize(float x, float min_val, float max_val){
+float normalizeJoystickValue(float x, float min_val, float max_val){
     if (x == 0.0){
       return 0.0;
     }else if (x > 0){ 
@@ -106,6 +133,45 @@ float mapJoystickValue(float value, float minVal, float maxVal, float centerZone
     }
     return (result * neg);
     }
+
+
+
+String jog_build_cmd(float x, float y, float z, float magnitude){
+    String cmd  = "$J=G91";
+    float feed = calculateFeed(magnitude);
+    float val;
+    if (x != 0){
+        val = calculateDistance(x, feed);
+        cmd = cmd + " X" + String(val, 3);
+    }
+    if (y != 0){
+        val = calculateDistance(y, feed);
+        cmd = cmd + " Y" + String(val, 3);
+    }
+    if (z != 0){
+        val = calculateDistance(y, feed);
+        cmd = cmd + " Z" + String(val, 3);
+    }
+
+    cmd = cmd + " F" + String(feed, 0) + "\n";
+
+    return cmd;
+}
+
+float calculateFeed(float value){ 
+    float max_feed = float(JOY_MAX_FEED);
+    return (max_feed * abs(value));
+}
+
+float calculateDistance(float value, float feed){ 
+    // calculate distance
+    float dt = 0.2;
+    float distance = feed / 60 * dt;
+    if (value < 0){
+        distance = distance * -1;
+    }
+    return distance;
+}
 
 void loop() {
   
