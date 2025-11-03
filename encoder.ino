@@ -11,7 +11,7 @@ long lastPos = 0;           // Changed to non-static for access from main.ino
 unsigned long timerEncoder = 0;  // will store last time encoder was read
 unsigned long timerEncoderRest = 0;  // will store last time encoder was read
 
-const long interval = 100;         // interval for sending jog commands in milliseconds
+const long interval = float(SEND_INTERVAL);         // interval for sending jog commands in milliseconds
 
 
 // interrupt based encoder reading

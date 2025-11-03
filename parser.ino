@@ -1,29 +1,29 @@
-
+#include "parser.h"
 #define MAX_AXIS 5
 
-struct GrblStatus {
-    // Machine/work coordinates
-    float position_raw[MAX_AXIS];     // X Y Z A B raw
-    float position_offset[MAX_AXIS];  // WCO offsets
-    float position[MAX_AXIS];         // Machine - offset
-    uint8_t axis;                     // number of axes
-
-    // Status & overrides
-    char status[16];
-    float feed;           // FS feed
-    float spindle;        // FS spindle
-    float feed_ov;        // Ov feed override
-    float spindle_ov;     // Ov spindle override
-    float rapid_ov;       // Ov rapid override
-
-    // Buffer
-    int buffer_state;     // Bf state
-    int buffer_size;      // Bf size
-
-    // G5x & TLO
-    char g5x[8];
-    float tlo;
-};
+// struct GrblStatus {
+//     // Machine/work coordinates
+//     float position_raw[MAX_AXIS];     // X Y Z A B raw
+//     float position_offset[MAX_AXIS];  // WCO offsets
+//     float position[MAX_AXIS];         // Machine - offset
+//     uint8_t axis;                     // number of axes
+//
+//     // Status & overrides
+//     char status[16];
+//     float feed;           // FS feed
+//     float spindle;        // FS spindle
+//     float feed_ov;        // Ov feed override
+//     float spindle_ov;     // Ov spindle override
+//     float rapid_ov;       // Ov rapid override
+//
+//     // Buffer
+//     int buffer_state;     // Bf state
+//     int buffer_size;      // Bf size
+//
+//     // G5x & TLO
+//     char g5x[8];
+//     float tlo;
+// };
 
 GrblStatus grbl;
 
@@ -150,3 +150,22 @@ void parseGrblStatus(const String &info) {
         else if (parts[i].startsWith("FS:")) parseFS(parts[i]);
     }
 }
+
+String parseGrblState(const String &info) {
+    resetGrblStatus();
+    int start = info.indexOf('<');
+    int end = info.indexOf('>');
+    if (start == -1 || end == -1) return "";
+
+    String s = info.substring(start + 1, end);
+    int comma = s.indexOf(',');
+    if (comma == -1){
+        // grbl.status = s;
+        return s;  // only status, no commas
+      } 
+    else
+    {
+        return s.substring(0, comma);
+    }
+}
+  
