@@ -2,6 +2,7 @@
 #include "config.h"
 #include "encoder.h"
 #include "joystick.h"
+#include "parser.h"
 
 volatile int active = 0;           // Volatile for ISR access
 const int buttonPin = 20;  
@@ -46,12 +47,16 @@ void setup() {
 void loop() {
   
   // readJogEncoder();
-  // String test = "<Run,MPos:1.111,2.222,3.333,WPos:4.444,5.555,6.666>";
+  // String test = "<Hold:0|MPos:-273.141,-109.772,-4.059|Bf:100,1019|FS:0,0|Pn:HSO|WCO:-319.950,-194.084,-67.363>";
+
+  String test = "<Hold:0|MPos:-273.141,-109.772,-4.059|Bf:100,1019|FS:0,0|Pn:HSO|WCO:-319.950,-194.084,-67.363>";
+  parseGrblStatusReport(test);
+  delay(1000);
   // parseGrblStatus(test);
   // Serial.println(grbl.position_raw[0]);
   // String state = parseGrblState(test);
   // Serial.println(state);
-  readJoystick();
+  // readJoystick();
 
   if (Serial2.available()) {
     char c = Serial2.read();

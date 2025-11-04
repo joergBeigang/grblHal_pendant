@@ -1,171 +1,113 @@
-#include "parser.h"
-#define MAX_AXIS 5
+// String grblStatus = "";
 
-// struct GrblStatus {
-//     // Machine/work coordinates
-//     float position_raw[MAX_AXIS];     // X Y Z A B raw
-//     float position_offset[MAX_AXIS];  // WCO offsets
-//     float position[MAX_AXIS];         // Machine - offset
-//     uint8_t axis;                     // number of axes
-//
-//     // Status & overrides
-//     char status[16];
-//     float feed;           // FS feed
-//     float spindle;        // FS spindle
-//     float feed_ov;        // Ov feed override
-//     float spindle_ov;     // Ov spindle override
-//     float rapid_ov;       // Ov rapid override
-//
-//     // Buffer
-//     int buffer_state;     // Bf state
-//     int buffer_size;      // Bf size
-//
-//     // G5x & TLO
-//     char g5x[8];
-//     float tlo;
-// };
+struct GrblStatus {
+  String status;
+  float machinePosition[MAX_AXIS];
+  float machinePositionOffsets[MAX_AXIS];
+  float feedSpeed[2];
+  float overRides[3];
+  float position[MAX_AXIS];
+};
 
-GrblStatus grbl;
-
-void resetGrblStatus() {
-    for (int i=0;i<MAX_AXIS;i++) {
-        grbl.position_raw[i] = 0;
-        grbl.position_offset[i] = 0;
-        grbl.position[i] = 0;
-    }
-    grbl.axis = 3;
-    strcpy(grbl.status, "-");
-    grbl.feed = 0;
-    grbl.spindle = 0;
-    grbl.feed_ov = 100;
-    grbl.spindle_ov = 100;
-    grbl.rapid_ov = 100;
-    grbl.buffer_state = 100;
-    grbl.buffer_size = 1023;
-    strcpy(grbl.g5x, "G54");
-    grbl.tlo = 0;
-}
-
-// Helper to split string by delimiter into array of strings
-void splitString(const String &s, char delim, String *out, int maxOut, int &count) {
-    int lastIndex = 0;
-    int nextIndex = 0;
-    count = 0;
-    while ((nextIndex = s.indexOf(delim, lastIndex)) != -1 && count < maxOut) {
-        out[count++] = s.substring(lastIndex, nextIndex);
-        lastIndex = nextIndex + 1;
-    }
-    if (count < maxOut && lastIndex < s.length()) {
-        out[count++] = s.substring(lastIndex);
-    }
-}
-
-// Parse MPos: X,Y,Z,... into position_raw and position (offset subtracted)
-void parseMPos(const String &part) {
-    String s = part;
-    s.replace("MPos:", "");
-    String fields[MAX_AXIS];
-    int count;
-    splitString(s, ',', fields, MAX_AXIS, count);
-    grbl.axis = count;
-    for (int i = 0; i < count; i++) {
-        grbl.position_raw[i] = fields[i].toFloat();
-        grbl.position[i] = grbl.position_raw[i] - grbl.position_offset[i];
-    }
-}
-
-// Parse WCO: X,Y,Z,... into position_offset and recompute position
-void parseWCO(const String &part) {
-    String s = part;
-    s.replace("WCO:", "");
-    String fields[MAX_AXIS];
-    int count;
-    splitString(s, ',', fields, MAX_AXIS, count);
-    for (int i = 0; i < count; i++) {
-        grbl.position_offset[i] = fields[i].toFloat();
-        grbl.position[i] = grbl.position_raw[i] - grbl.position_offset[i];
-    }
-}
-
-// Parse Bf: buffer state,size
-void parseBf(const String &part) {
-    String s = part;
-    s.replace("Bf:", "");
-    String fields[2];
-    int count;
-    splitString(s, ',', fields, 2, count);
-    if (count >= 1) grbl.buffer_state = fields[0].toInt();
-    if (count >= 2) grbl.buffer_size = fields[1].toInt();
-}
-
-// Parse Ov: feed,spindle,rapid overrides
-void parseOv(const String &part) {
-    String s = part;
-    s.replace("Ov:", "");
-    String fields[3];
-    int count;
-    splitString(s, ',', fields, 3, count);
-    if (count >= 1) grbl.feed_ov = fields[0].toFloat();
-    if (count >= 2) grbl.spindle_ov = fields[1].toFloat();
-    if (count >= 3) grbl.rapid_ov = fields[2].toFloat();
-}
-
-// Parse FS: feed, spindle speed
-void parseFS(const String &part) {
-    String s = part;
-    s.replace("FS:", "");
-    String fields[2];
-    int count;
-    splitString(s, ',', fields, 2, count);
-    if (count >= 1) grbl.feed = fields[0].toFloat();
-    if (count >= 2) grbl.spindle = fields[1].toFloat();
-}
-
-// Main status parser: expects <…> string
-void parseGrblStatus(const String &info) {
-    resetGrblStatus();
-
+GrblStatus grblStatus;
+void parseGrblState(const String &info) {
     int start = info.indexOf('<');
     int end = info.indexOf('>');
-    if (start == -1 || end == -1) return;
-
     String s = info.substring(start + 1, end);
-    s.toUpperCase();
-
-    // Split by '|'
-    String parts[10];
-    int count;
-    splitString(s, '|', parts, 10, count);
-    if (count < 1) return;
-
-    // First part is status
-    parts[0].toCharArray(grbl.status, sizeof(grbl.status));
-
-    // Parse remaining parts
-    for (int i = 1; i < count; i++) {
-        if (parts[i].startsWith("MPOS:")) parseMPos(parts[i]);
-        else if (parts[i].startsWith("WCO:")) parseWCO(parts[i]);
-        else if (parts[i].startsWith("BF:")) parseBf(parts[i]);
-        else if (parts[i].startsWith("OV:")) parseOv(parts[i]);
-        else if (parts[i].startsWith("FS:")) parseFS(parts[i]);
-    }
-}
-
-String parseGrblState(const String &info) {
-    resetGrblStatus();
-    int start = info.indexOf('<');
-    int end = info.indexOf('>');
-    if (start == -1 || end == -1) return "";
-
-    String s = info.substring(start + 1, end);
-    int comma = s.indexOf(',');
-    if (comma == -1){
-        // grbl.status = s;
-        return s;  // only status, no commas
-      } 
-    else
-    {
-        return s.substring(0, comma);
-    }
+    int comma = s.indexOf('|');
+    grblStatus.status = s.substring(0, comma);
 }
   
+float* parseGrblMachinePosition(const String &info, const String indicator, int size) {
+    static float values[MAX_AXIS];
+    int mposIndex = info.indexOf(indicator);
+    if (mposIndex == -1) {
+        return nullptr; // MPos not found
+    }
+    int start = mposIndex + indicator.length();
+    // int start = mposIndex + 5; // Move pas "MPos:"
+    int end = info.indexOf(',', start);
+    for (int i = 0; i < size; i++) {
+        int nextComma = info.indexOf(',', start);
+        String value;
+        if (nextComma == -1) {
+            value = info.substring(start);
+        } else {
+            value = info.substring(start, nextComma);
+        }
+        // grblStatus.machinePosition[i] = value.toFloat();
+        values[i] = value.toFloat();
+        start = nextComma + 1;
+        if (nextComma == -1) {
+            break; // No more values
+        }
+    }
+  return values;
+  }
+
+void calculatePosition(){
+  grblStatus.position[0] = grblStatus.machinePosition[0] - grblStatus.machinePositionOffsets[0];
+  grblStatus.position[1] = grblStatus.machinePosition[1] - grblStatus.machinePositionOffsets[1];
+  grblStatus.position[2] = grblStatus.machinePosition[2] - grblStatus.machinePositionOffsets[2];
+}
+
+void parseGrblStatusReport(String report){
+    // is it a status report?
+    int start = report.indexOf('<');
+    int end = report.indexOf('>');
+    if (start == -1 || end == -1){
+      return;
+    }
+
+    // all upper case 
+    report.toUpperCase();
+
+    // parse state
+    parseGrblState(report);
+
+    // parse machine position
+    float* pos = parseGrblMachinePosition(report, "MPOS:", MAX_AXIS);
+    if (pos != nullptr){
+        for (int i = 0; i < MAX_AXIS; i++){
+          grblStatus.machinePosition[i] = pos[i];
+        }
+    }
+    pos = parseGrblMachinePosition(report, "WCO:", MAX_AXIS);
+    if (pos != nullptr){
+        for (int i = 0; i < MAX_AXIS; i++){
+          grblStatus.machinePositionOffsets[i] = pos[i];
+        }
+    }
+
+    pos = parseGrblMachinePosition(report, "FS:", 2);
+    if (pos != nullptr){
+        for (int i = 0; i < 2; i++){
+          grblStatus.feedSpeed[i] = pos[i];
+        }
+    }
+
+    pos = parseGrblMachinePosition(report, "OV:", 3);
+    if (pos != nullptr){
+        for (int i = 0; i < 3; i++){
+          grblStatus.overRides[i] = pos[i];
+        }
+    }
+
+    calculatePosition();
+
+    Serial.print("raw: ");
+    Serial.print(grblStatus.machinePosition[0]);
+    Serial.print(grblStatus.machinePosition[1]);
+    Serial.println(grblStatus.machinePosition[2]);
+    Serial.print("wco: ");
+    Serial.print(grblStatus.machinePositionOffsets[0]);
+    Serial.print(grblStatus.machinePositionOffsets[1]);
+    Serial.println(grblStatus.machinePositionOffsets[2]);
+    Serial.print(" calculatePosition: ");
+    Serial.print(grblStatus.position[0]);
+    Serial.print(grblStatus.position[1]);
+    Serial.println(grblStatus.position[2]);
+
+
+}
+
