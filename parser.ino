@@ -1,15 +1,6 @@
 // String grblStatus = "";
 
-struct GrblStatus {
-  String status;
-  float machinePosition[MAX_AXIS];
-  float machinePositionOffsets[MAX_AXIS];
-  float feedSpeed[2];
-  float overRides[3];
-  float position[MAX_AXIS];
-};
 
-GrblStatus grblStatus;
 void parseGrblState(const String &info) {
     int start = info.indexOf('<');
     int end = info.indexOf('>');
@@ -95,18 +86,6 @@ void parseGrblStatusReport(String report){
 
     calculatePosition();
 
-    Serial.print("raw: ");
-    Serial.print(grblStatus.machinePosition[0]);
-    Serial.print(grblStatus.machinePosition[1]);
-    Serial.println(grblStatus.machinePosition[2]);
-    Serial.print("wco: ");
-    Serial.print(grblStatus.machinePositionOffsets[0]);
-    Serial.print(grblStatus.machinePositionOffsets[1]);
-    Serial.println(grblStatus.machinePositionOffsets[2]);
-    Serial.print(" calculatePosition: ");
-    Serial.print(grblStatus.position[0]);
-    Serial.print(grblStatus.position[1]);
-    Serial.println(grblStatus.position[2]);
 
 
 }

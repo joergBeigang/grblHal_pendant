@@ -8,11 +8,11 @@ String jogAxis = "x";
 long lastPos = 0;           // Changed to non-static for access from main.ino
 //volatile bool lastA = 0;
 //volatile bool lastB = 0;
-unsigned long timerEncoder = 0;  // will store last time encoder was read
-unsigned long timerEncoderRest = 0;  // will store last time encoder was read
 
 const long interval = float(SEND_INTERVAL);         // interval for sending jog commands in milliseconds
 
+long timerEncoder = 0;
+long timerEncoderRest  = 0;
 
 // interrupt based encoder reading
 void encoderISR() {   // just remove IRAM_ATTR
