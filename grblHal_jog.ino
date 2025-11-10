@@ -6,7 +6,7 @@
 #include "encoder.h"
 #include "joystick.h"
 #include "parser.h"
-#include "gui.h"
+#include "gui_render.h"
 #include "gui_build.h"
 
 volatile bool active = false;       // if true = in control via uart
