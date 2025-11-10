@@ -1,4 +1,4 @@
 #pragma once
 #include <Arduino.h>
 
-void drawMainScreen(int index);
+void drawScreen(int index);

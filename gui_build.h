@@ -7,6 +7,8 @@ struct MenuItem {
   void (*action)();
   struct MenuItem* submenu;
   bool selected = false;
+  float* value = nullptr;
+  int digits = 3;
 };
 
 struct UiItem {
@@ -23,6 +25,7 @@ struct UiDynamicItem {
   int y;
   float* value = nullptr;
   String* svalue = nullptr;
+  int digits = 3;
 };
 
 struct UiPage {
@@ -50,3 +53,4 @@ extern const int rootUiCount;
 
 
 extern UiPage rootPage;
+extern UiPage* currentPage;

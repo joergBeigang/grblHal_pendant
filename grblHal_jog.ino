@@ -93,7 +93,7 @@ void setup() {
   // interrupts for encoder reading
   attachInterrupt(digitalPinToInterrupt(ENCODER_A), encoderISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(ENCODER_B), encoderISR, CHANGE);
-  drawMainScreen(0);
+  drawScreen(0);
 }
 
 
@@ -161,7 +161,7 @@ void rotaryMenuLoop(){
         rotatryMenuLastPos = movement;
       // wrap around
 
-      drawMainScreen(cursorPosition);  // redraw cursor
+      drawScreen(cursorPosition);  // redraw cursor
     }
 
   if (rotaryMenu.isEncoderButtonClicked()) {

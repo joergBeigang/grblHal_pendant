@@ -5,6 +5,7 @@
  */ 
 
 #include "gui_build.h"
+#include "gui_menu_actions.h"
 
 // *********
 // root page 
@@ -14,33 +15,45 @@
 
 // build the menu structure
 // label, startPosX, startPosY, action, submenu
+
 MenuItem rootMenu[] = {
-    {"Menu", 3, 60, nullptr, nullptr},
-    {"OFF", 30, 60, nullptr, nullptr},
-    {"X", 55, 60, nullptr, nullptr},
-    {"Y", 70, 60, nullptr, nullptr},
-    {"Z", 85, 60, nullptr, nullptr},
-    {"Joy", 100, 60, nullptr, nullptr},
-    {"123.123", 3, 20, nullptr, nullptr},
-    {"123.123", 26, 20, nullptr, nullptr},
-    {"123.123", 55, 20, nullptr, nullptr},
-  };
+    {.label = "Menu", .x = 3, .y = 60, .action = actionMenu, .submenu = nullptr},
+    {.label = "OFF",  .x = 30, .y = 60, .action = actionOff,  .submenu = nullptr},
+    {.label = "X",    .x = 55, .y = 60, .action = actionX,    .submenu = nullptr},
+    {.label = "Y",    .x = 70, .y = 60, .action = actionY,    .submenu = nullptr},
+    {.label = "Z",    .x = 85, .y = 60, .action = actionZ,    .submenu = nullptr},
+    {.label = "Joy",  .x = 100,.y = 60, .action = actionJoy,  .submenu = nullptr},
+    {.label = "123.123", .x = 3,  .y = 20, .action = actionXPos, .submenu = nullptr, .value = &grblStatus.position[0]},
+    {.label = "123.123", .x = 55, .y = 20, .action = actionyPos, .submenu = nullptr, .value = &grblStatus.position[1]},
+    {.label = "123.123", .x = 80, .y = 20, .action = actionzPos, .submenu = nullptr, .value = &grblStatus.position[2]},
+};
+// MenuItem rootMenu[] = {
+//     {.label = "Menu", .x = 3, .y = 60, .action = actionMenu},
+//     {.label = "OFF", .x = 30, .y = 60, .action = actionOff},
+//     {.label = "X", .x = 55, .y = 60, .action = actionX},
+//     {.label = "Y", .x = 70, .y = 60, .action = actionY},
+//     {.label = "Z", .x = 85, .y = 60, .action = actionZ},
+//     {.label = "Joy", .x = 100, .y = 60, .action = actionJoy},
+//     { .label = "123.123", .x = 3, .y = 20, .value = &grblStatus.position[0], .action = actionXPos },
+//     { .label = "123.123", .x = 55, .y = 20, .value = &grblStatus.position[1], .action = actionyPos },
+//     { .label = "123.123", .x = 80, .y = 20, .value = &grblStatus.position[2], .action = actionzPos },
+// };
 const int rootMenuCount = sizeof(rootMenu) / sizeof(MenuItem);
 
 UiItem rootUi[] = {
-    {"X:", u8g2_font_profont12_tr, 0, 13},
-    {"Y:", u8g2_font_profont12_tr, 40, 13},
-    {"Z:", u8g2_font_profont12_tr, 80, 13},
-    {"Feed:", u8g2_font_4x6_tr, 0, 33},
-    {"Spindle:", u8g2_font_4x6_tr, 35, 33},
-    {"Rapid:",u8g2_font_4x6_tr, 80, 33},
-    {"State:", u8g2_font_4x6_tr, 50, 43},
+    {.label = "X:", .font = u8g2_font_profont12_tr, .x = 0, .y = 13},
+    {.label = "Y:", .font = u8g2_font_profont12_tr, .x = 40, .y = 13},
+    {.label = "Z:", .font = u8g2_font_profont12_tr, .x = 80, .y = 13},
+    {.label = "Feed:", .font = u8g2_font_4x6_tr, .x = 0, .y = 33},
+    {.label = "Spindle:", .font = u8g2_font_4x6_tr, .x = 35, .y = 33},
+    {.label = "Rapid:", .font = u8g2_font_4x6_tr, .x = 80, .y = 33},
+    {.label = "State:", .font = u8g2_font_4x6_tr, .x = 50, .y = 43},
   };
 const int rootUiCount = sizeof(rootUi) / sizeof(UiItem);
 UiDynamicItem rootDynamicUi[] = {
-    {"Feed:", u8g2_font_4x6_tr, 20, 33, &grblStatus.overRides[0], nullptr},
-    {"Spindle:", u8g2_font_4x6_tr, 70, 33, &grblStatus.overRides[1], nullptr},
-    {"Rapid:",u8g2_font_4x6_tr, 110, 33, &grblStatus.overRides[2], nullptr},
+    {"Feed:", u8g2_font_4x6_tr, 20, 33, &grblStatus.overRides[0], nullptr,0},
+    {"Spindle:", u8g2_font_4x6_tr, 70, 33, &grblStatus.overRides[1], nullptr,0},
+    {"Rapid:",u8g2_font_4x6_tr, 110, 33, &grblStatus.overRides[2], nullptr,0},
     {"State:", u8g2_font_4x6_tr, 80, 43, nullptr, &grblStatus.status},
   };
 
@@ -56,25 +69,10 @@ UiPage rootPage = {
   rootDynamicUiCount
 };
 
-
-
-
-// **********************
-// actions for metu items
-// **********************
-void actionOff(){
-  for (int i = 0; i<rootMenuCount; i++){
-    MenuItem &item = rootMenu[i];
-    if (i == cursorPosition){
-      Serial.print(i);
-      Serial.println("Action OFF");
-      item.selected = true;
-    }
-    else {
-      item.selected = false;
-    }
-  }
-  drawMainScreen(cursorPosition);  // redraw cursor
-}
+//
+// *****************************************************
+// currwent page pointer is what is going to be rendered
+// *****************************************************
+UiPage* currentPage = &rootPage;
 
 
