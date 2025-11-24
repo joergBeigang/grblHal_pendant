@@ -42,3 +42,10 @@
 #define SPINDLE_A 33
 #define SPINDLE_B 32
 #define SPINDLE_SW 35
+
+// *********************
+// rotary encoder invert
+// *********************
+// 1 = invert is true
+// 0 = invert is false
+#define MENU_INVERT 1

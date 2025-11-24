@@ -39,9 +39,12 @@ struct UiPage {
 
   UiDynamicItem* dynItems;
   int dynCount;
+
+  struct UiPage* parent;
 };
 
 // Declare it as extern so other files can access it
+// root menu
 extern MenuItem rootMenu[];
 extern const int rootMenuCount;
 
@@ -51,6 +54,33 @@ extern const int rootUiCount;
 extern UiDynamicItem rootDynamicUi[];
 extern const int rootUiCount;
 
+extern UiPage rootPage;
 
 extern UiPage rootPage;
+
+
+// set axis menu
+extern MenuItem setAxisMenu[];
+extern const int setAxisMenuCount;
+
+extern UiItem setAxisXUi[];
+extern const int setAxisXUiCount;
+
+
+extern UiDynamicItem setAxisDynamicUi[];
+extern const int setAxisDynamniUiCount;
+
+extern MenuItem menuMenu[];
+extern const int menuMenuCount;
+
+extern UiPage setAxisXPage;
+extern UiPage setAxisyPage;
+extern UiPage setAxiszPage;
+extern UiPage menuPage;
+extern UiPage confirmHomingPage;
+
 extern UiPage* currentPage;
+
+
+
+

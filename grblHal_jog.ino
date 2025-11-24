@@ -8,16 +8,24 @@
 #include "parser.h"
 #include "gui_render.h"
 #include "gui_build.h"
+#include "gui_menu_actions.h"
+#include <Button.h>
 
 volatile bool active = false;       // if true = in control via uart
 unsigned long timerJog = 0;  // will store last time encoder was read
 unsigned long timerJogRest = 0;  // will store last time encoder was read
-
-float test = 10;
+volatile UiPage* nextPage = nullptr;
+bool isEncoderButtonDown = 0;
+// float test = 10;
 int cursorPosition = 0;          // where the cursor currently is
-int selectedIndex = -1;          // -1 = nothing selected yet
+int selectedIndex = -1;          // 1 = off is selected on startup
 // const long interval = float(SEND_INTERVAL);         // interval for sending jog commands in milliseconds
 int mode = 0;                      // 0 = None, 1 = Encoder, 2 = Joystick
+                                   //
+float valueEdit = 0.0;  // value for editing in the menu
+int lastValue = 0;
+float  *test = &valueEdit;
+bool setValueMode = false;
 
 GrblStatus grblStatus;
 // display
@@ -25,11 +33,13 @@ GrblStatus grblStatus;
 U8G2_SSD1309_128X64_NONAME2_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 
 // rotary encoder menu
-AiEsp32RotaryEncoder rotaryMenu(MENU_A, MENU_B, MENU_SW, -1, 4);
+AiEsp32RotaryEncoder rotaryMenu(MENU_A, MENU_B, -1, -1, 4);
 // rotary encoder feed override
 AiEsp32RotaryEncoder rotaryFeed(FEED_A, FEED_B, FEED_SW, -1, 4);
 // rotary encoder spindle override
 AiEsp32RotaryEncoder rotarySpindle(SPINDLE_A, SPINDLE_B, SPINDLE_SW, -1, 4);
+
+Button buttonMenu(MENU_SW);
 
 // ISR – NO delay(), NO Serial, NO heavy code!
 void IRAM_ATTR readEncoderISR() {
@@ -43,14 +53,15 @@ void setupRotaryEncoders() {
   rotaryMenu.begin();
   rotaryMenu.setup(readEncoderISR);
   rotaryMenu.disableAcceleration();
+  buttonMenu.begin();
 
-  // rotaryFeed.begin();
-  // rotaryFeed.setBoundaries(20, 200, true);
-  // rotaryFeed.setup(readEncoderISR);
-  //
-  // rotarySpindle.begin();
-  // rotarySpindle.setBoundaries(20, 200, true);
-  // rotarySpindle.setup(readEncoderISR);
+  rotaryFeed.begin();
+  rotaryFeed.setBoundaries(20, 200, true);
+  rotaryFeed.setup(readEncoderISR);
+
+  rotarySpindle.begin();
+  rotarySpindle.setBoundaries(20, 200, true);
+  rotarySpindle.setup(readEncoderISR);
 
 
 }
@@ -63,11 +74,12 @@ void setupRotaryEncoders() {
 
 void setup() {
   grblStatus.status = "NONE";
-  grblStatus.position[0] = 0.0;
-  grblStatus.position[1] = 0.0;
-  grblStatus.position[2] = 0.0;
+  grblStatus.position[0] = 990.0;
+  grblStatus.position[1] = 120.0;
+  grblStatus.position[2] = 183.0;
   grblStatus.overRides[0] = 100.0;
   grblStatus.overRides[1] = 100.0;
+  grblStatus.overRides[2] = 100.0;
   // Serial
   // Serial usb for debugging
   Serial.begin(115200);
@@ -90,6 +102,7 @@ void setup() {
   setupRotaryEncoders();
   lastA = digitalRead(ENCODER_A);
   lastB = digitalRead(ENCODER_B);
+
   // interrupts for encoder reading
   attachInterrupt(digitalPinToInterrupt(ENCODER_A), encoderISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(ENCODER_B), encoderISR, CHANGE);
@@ -149,34 +162,91 @@ void setup() {
 //
 // }
 int rotatryMenuLastPos = 0;
-bool rotaryMenuButtonPressed = false;
+
+int rotatryFeedLastPos = 0;
+
+int rotatrySpindleLastPos = 0;
+
+void moveCursor(){
+  int inverter = 1;
+  if (MENU_INVERT == 1){
+    inverter = -1;
+  }
+    int movement = rotaryMenu.readEncoder();  // cumulative steps since last reset
+    int dif =(movement-rotatryMenuLastPos) * inverter;
+    cursorPosition += dif;
+    if (cursorPosition < 0) cursorPosition = 0;
+    if (cursorPosition >= currentPage -> menuCount) cursorPosition = currentPage -> menuCount - 1;
+      rotatryMenuLastPos = movement;
+}
+
+void setValue(){
+  Serial.println("setting value");
+  int inverter = 1;
+  if (MENU_INVERT == 1){
+    inverter = -1;
+  }
+    int movement = rotaryMenu.readEncoder();  // cumulative steps since last reset
+                                              // S
+    valueEdit = float((movement * 0.1)*inverter);
+}
 
 void rotaryMenuLoop(){
   if (rotaryMenu.encoderChanged()) {
-      int movement = rotaryMenu.readEncoder();  // cumulative steps since last reset
-      int dif =movement -rotatryMenuLastPos;
-          cursorPosition += dif;
-        if (cursorPosition < 0) cursorPosition = 0;
-        if (cursorPosition >= rootMenuCount) cursorPosition = rootMenuCount - 1;
-        rotatryMenuLastPos = movement;
-      // wrap around
-
-      drawScreen(cursorPosition);  // redraw cursor
+    if (setValueMode == false) moveCursor();
+    if (setValueMode == true) setValue();
+    drawScreen(cursorPosition);
     }
+	
+	if (buttonMenu.released()) {
+    // drawScreen(cursorPosition);
+    // MenuItem &item = rootMenu[cursorPosition];
+    MenuItem &item = currentPage->menuItems[cursorPosition];
 
-  if (rotaryMenu.isEncoderButtonClicked()) {
-    MenuItem &item = rootMenu[cursorPosition];
     if (item.action != nullptr){
       item.action();
+    }
+    if(nextPage != nullptr){
+      currentPage = const_cast<UiPage*>(nextPage);  // remove volatile
+      // currentPage = nextPage; // safely change page
+      // selectedIndex = 0;
+      nextPage = nullptr;
+      drawScreen(0);          // safe draw
     }
   }
 }
 
+void rotaryFeedLoop(){
+  if (rotaryFeed.encoderChanged()) {
+    Serial.println("feed");
+      int inverter = 1;
+      int movement = rotaryFeed.readEncoder();  // cumulative steps since last reset
+      // int dif =(movement-rotatryFeedLastPos) * inverter;
+      grblStatus.overRides[0] = movement;
+      rotatryMenuLastPos = grblStatus.overRides[0];
+      // wrap around
+
+      drawScreen(cursorPosition);  // redraw cursor
+  }
+}
+
+void rotarySpindleLoop(){
+  if (rotarySpindle.encoderChanged()) {
+    Serial.println("spindle");
+      int inverter = 1;
+      int movement = rotarySpindle.readEncoder();  // cumulative steps since last reset
+      grblStatus.overRides[1] = movement ;
+      // wrap around
+
+      drawScreen(cursorPosition);  // redraw cursor
+  }
+}
 void loop() {
     rotaryMenuLoop();
+    rotaryFeedLoop();
+    rotarySpindleLoop();
     // String test = "<Hold:0|MPos:-273.141,-109.772,-4.059|Bf:100,1019|FS:0,0|Pn:HSO|WCO:-319.950,-194.084,-67.363>";
     // parseGrblStatusReport(test);
-    // delay(1000);
     // readJoystick();
     // for (int i = 0; i < 6; i++){
       // drawMainScreen(i);
