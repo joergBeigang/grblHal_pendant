@@ -41,7 +41,7 @@
 // spindle overrides
 #define SPINDLE_A 33
 #define SPINDLE_B 32
-#define SPINDLE_SW 35
+#define SPINDLE_SW 4
 
 // *********************
 // rotary encoder invert

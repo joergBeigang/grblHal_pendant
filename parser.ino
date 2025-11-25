@@ -42,12 +42,12 @@ void calculatePosition(){
   grblStatus.position[2] = grblStatus.machinePosition[2] - grblStatus.machinePositionOffsets[2];
 }
 
-void parseGrblStatusReport(String report){
+bool parseGrblStatusReport(String report){
     // is it a status report?
     int start = report.indexOf('<');
     int end = report.indexOf('>');
     if (start == -1 || end == -1){
-      return;
+      return false;
     }
 
     // all upper case 
@@ -85,8 +85,6 @@ void parseGrblStatusReport(String report){
     }
 
     calculatePosition();
-
-
-
+    return true;
 }
 

@@ -68,7 +68,7 @@ UiPage rootPage = {
 
 
 MenuItem setAxisMenu[] = {
-    {.label = "123.123", .x = 40,  .y = 33, .action = actionSetValue, .submenu = nullptr, .value = test},
+    {.label = "123.123", .x = 40,  .y = 33, .action = actionSetValue, .submenu = nullptr, .value = pValueEdit},
     // {.label = "0.0", .x = 40, .y = 30, .action = actionSetValue, .submenu = nullptr},
     {.label = "Cancel", .x = 3, .y = 60, .action = actionCancel, .submenu = nullptr},
     {.label = "Set",  .x = 50, .y = 60, .action = actionSetAxisX,  .submenu = nullptr},
@@ -188,10 +188,41 @@ UiPage confirmHomingPage = {
 };
 
 
+// ***************
+// run code screen
+// ***************
 
 
+MenuItem runMenu[] = {
+    {.label = "Pause", .x = 3, .y = 60, .action = actionMenu, .submenu = nullptr},
+    {.label = "Resume",  .x = 30, .y = 60, .action = actionOff,  .submenu = nullptr},
+};
+
+const int runMenuCount = sizeof(runMenu) / sizeof(MenuItem);
+
+UiDynamicItem runDynamicUi[] = {
+    {"123.123", u8g2_font_4x6_tr, 1, 13, &grblStatus.position[0], nullptr, 3},
+    {"123.123", u8g2_font_4x6_tr, 43,  13, &grblStatus.position[1], nullptr, 3},
+    {"123.123", u8g2_font_4x6_tr, 83,  13, &grblStatus.position[2], nullptr, 3},
+    {"Feed:", u8g2_font_4x6_tr, 20, 43, &grblStatus.overRides[0], nullptr,0},
+    {"Spindle:", u8g2_font_4x6_tr, 70, 43, &grblStatus.overRides[1], nullptr,0},
+    {"Rapid:",u8g2_font_4x6_tr, 110, 43, &grblStatus.overRides[2], nullptr,0},
+    {"State:",u8g2_font_profont12_tr  , 56, 30, nullptr, &grblStatus.status},
+  };
+
+const int runDynamicUiCount = sizeof(runDynamicUi) / sizeof(UiDynamicItem);
 
 
+UiPage runPage = {
+  "run",
+  runMenu,
+  runMenuCount,
+  rootUi,
+  rootUiCount,
+  runDynamicUi,
+  runDynamicUiCount,
+  &rootPage
+};
 
 // *****************************************************
 // currwent page pointer is what is going to be rendered

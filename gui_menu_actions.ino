@@ -42,6 +42,7 @@ void actionOff(){
   //   MenuItem &item = rootMenu[i];
   //   // item.selected = (i == cursorPosition);
   // }
+  mode = 0;
   selectedIndex = cursorPosition;
   drawScreen(cursorPosition);
 }
@@ -50,14 +51,17 @@ void actionMenu() {
   nextPage = &menuPage;
   selectedIndex = -1;
   cursorPosition = 0;
+  mode = 0;
 }
 void actionX() {
   selectedIndex = cursorPosition;
   drawScreen(cursorPosition);
+  mode = 2;
 }
 void actionY() {
   selectedIndex = cursorPosition;
   drawScreen(cursorPosition);
+  mode = 3;
 }
 void actionZ() {
   
@@ -67,8 +71,10 @@ void actionZ() {
 void actionJoy() {
   selectedIndex = cursorPosition;
   drawScreen(cursorPosition);
+  mode = 1;
 }
 void actionXPos() {
+  mode = 0;
   nextPage = &setAxisXPage;
   drawScreen(0);
   cursorPosition = 0;
@@ -76,6 +82,7 @@ void actionXPos() {
   Serial.println("action");
 }
 void actionYPos() {
+  mode = 0;
   nextPage = &setAxisYPage;
   drawScreen(0);
   cursorPosition = 0;
@@ -83,6 +90,7 @@ void actionYPos() {
   Serial.println("action");
 }
 void actionZPos() {
+  mode = 0;
   nextPage = &setAxisZPage;
   drawScreen(0);
   cursorPosition = 0;

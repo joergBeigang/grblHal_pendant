@@ -28,53 +28,46 @@ void encoderISR() {   // just remove IRAM_ATTR
 
 
 
-void readJogEncoder(){
+// run every .1 sec
+void readJogEncoder(String axis){
   static int32_t lastPos = 0;
-  unsigned long currentMillis = millis();
-
-  if (currentMillis - timerEncoder >= interval) {
-    // Set active if encoder moved (based on encoderPos change)
-      if (lastPos != encoderPos) {
-        if (active == 0){
-        Serial.println("active");
-//        toggleEnable();
-        active = 1;
-        }
-        // send jog command
-        encoderOut();
-        lastPos = encoderPos;
-        timerEncoderRest = currentMillis;
+  Serial.println(encoderPos);
+  // Set active if encoder moved (based on encoderPos change)
+  if (lastPos != encoderPos) {
+    if (active == 0){
+      Serial.println("active");
+      //        toggleEnable();
+      active = 1;
     }
-    timerEncoder = currentMillis;
-    }
- if (currentMillis - timerEncoderRest >= 1000) {
-  if (active == 1){
-    active = 0;
-//    toggleEnable();
-    Serial.println("off");
+    // send jog command
+    encoderOut(axis);
+    lastPos = encoderPos;
   }
-  
-   timerEncoderRest = currentMillis;
- }
+  else{
+ // if (currentMillis - timerEncoderRest >= 1000) {
+ // switch off uart mode
+    if (active == 1){
+      active = 0;
+      toggleEnable();
+      Serial.println("off");
+    }
+  }
 }
 
 /* 
  * reading the encoder position and preparing the jog command.
  * it is triggered every 100ms from the main loop via readJogEncoder()
  */
-void encoderOut() {
-  uint8_t info = 0x80;
-  Serial1.write(info);  
-  if (jogAxis == "none") {
-    return;
-  }
-  if (encoderPos == lastPos) {
-    return;  // No change in position
-  }
+void encoderOut(String axis) {
+  // uint8_t info = 0x80;
+  // Serial1.write(info);  
+  // if (encoderPos == lastPos) {
+  //   return;  // No change in position
+  // }
   float difference = lastPos - encoderPos;
   float mm = (difference / (float(PULSES_PER_REVOLUTION) * 2)) * float(MM_PER_REVOLUTION);
   if (abs(mm) > shortestMove){
-    String cmd = calculateCmd(mm);
+    String cmd = calculateCmd(mm, axis);
     Serial.println(difference);
     Serial.println(cmd);
     // wsClient.sendTXT(cmd);
@@ -85,10 +78,10 @@ void encoderOut() {
 }
 
 // builds the command with correct feedrate
-String calculateCmd(float mm){
+String calculateCmd(float mm, String axis){
   float feed = abs(mm * (60000 / float(interval)));
   String cmd = "$J=G91 ";
-  cmd += jogAxis;
+  cmd += axis;
   cmd += mm;
   cmd += " F";
   cmd += feed;

@@ -1,6 +1,15 @@
 /*
  * functions for jogging using a joystick
- * and the rotary encoder for the z axis
+ * and the rotary encoder for the z axis at the same time
+ *
+ * 1. joystick calculation for xy based on gnea grbl wiki
+ *  result is a feed rate and a distance
+ *  feed is based on the joystick input
+ * 2. we got a vector 2d in mm and a feed rate
+ *  z axis in mm comes in play:
+ *    calcuate the feed for only z motion
+ *    feed of xy and feed of z move form a vector. 
+ *    magnitude of this vector is the final feed rate
  */
 
 int joyXCenter = 1284;
@@ -10,45 +19,62 @@ float joyYMin = 0.85; // min value for Y axis
 
 // main function to read the joystick and send jog commands
 void readJoystick(){
-    float valueX = prepareJoystickValue(analogRead(JOY_X_PIN), .25, .31, .1,joyXCenter, .8);
-    float valueY = prepareJoystickValue(analogRead(JOY_Y_PIN), .39, .48, .1,joyYCenter, .8);
-    float valueZ = readJoystickEncoder();
-    float vec[3] = {valueX, valueY, valueZ};
-    float mag = magnitude(vec, 3);
-    String cmd = jog_build_cmd(valueX, valueY, valueZ, mag);
-    if (cmd != ""){
-      Serial.println(cmd);
-    }
+
+  // prepareJoystickValue returns a normalized float
+  // float value, float minVal, float maxVal, float centerZone, float center, float blend
+  float valueX = prepareJoystickValue(analogRead(JOY_X_PIN), .25, .31, .1,joyXCenter, .8);
+  float valueY = prepareJoystickValue(analogRead(JOY_Y_PIN), .39, .48, .1,joyYCenter, .8);
+  // readJoystickEncoder returns a distance in mm
+  float valueZ = readJoystickEncoder();
+
+  // no input, switch off uart listening of grblhal
+  if (valueX == 0.0 && valueY == 0.0 && valueZ == 0.0){
+    if (active == true){
+      active = false;
+      toggleEnable();
+    } 
+    return;
+  } 
+  // input, but grblhal isn't listening, switch uart on
+  if (active == false){
+    toggleEnable();
+    active = true;
   }
+
+  // float vec[3] = {valueX, valueY, valueZ};
+  float vec[2] = {valueX, valueY};
+  float mag2d = magnitude(vec, 2);
+  String cmd = jog_build_cmd(valueX, valueY, valueZ, mag2d);
+  if (cmd != ""){
+    Serial.println(cmd);
+  }
+}
 
 // read the encoder and return the distance moved in mm
 float readJoystickEncoder(){
-    static int lastPos = 0;
-    static int difPos = 0;
-
+  static int lastPos = 0;
+  static int difPos = 0;
+  if (lastPos != encoderPos) {
+    // send jog command
     
-    if (lastPos != encoderPos) {
-          // send jog command
-          
-          difPos = encoderPos - lastPos;
-          lastPos = encoderPos;
-          float mm = calculateJoystickEncoderDistance(difPos);
-          return mm;
-    }
-    return 0.0;
+    difPos = encoderPos - lastPos;
+    lastPos = encoderPos;
+    float mm = calculateJoystickEncoderDistance(difPos);
+    return mm;
+  }
+  return 0.0;
 }
 
 // translate the encoder steps into mm distance
 float calculateJoystickEncoderDistance(int steps){
     // one revolution is 10mm
     // 1200 steps per revolution
-    Serial.println(steps);
     float neg = 1.0;
     if (steps < 0){
       neg = -1.0;
       steps = abs(steps);
     }
-    return ((float(steps) / 1200.0) * 10.0) * neg;
+    return ((float(steps) / 1200.0) * 5.0) * neg;
 }
 // compute the magnitude of a 2D or 3D vector
 float magnitude(const float *v, int n) {
@@ -70,11 +96,9 @@ float magnitude(const float *v, int n) {
 float prepareJoystickValue(float value, float minVal, float maxVal, float centerZone, float center, float blend){
     float centerNormalized = float(center) / 4096;
     value= (float(value) / 4096) - centerNormalized;
-    Serial.print("raw value: ");
     value = mapJoystickValue(value, minVal, maxVal, centerZone);
     value = normalizeJoystickValue((value), centerZone, 1.0);
     value = ease_in_blend(value, blend);
-    Serial.println(value);
     return value;
 
 }
@@ -127,34 +151,54 @@ float mapJoystickValue(float value, float minVal, float maxVal, float centerZone
     }
 
 // builds the jog command for grblHAL
-String jog_build_cmd(float x, float y, float z, float magnitude){
-    bool chk = false;
-    String cmd  = "$J=G91";
-    float feed = calculateFeed(magnitude);
-    float val;
-    if (x != 0){
-        val = calculateDistance(x, feed);
-        Serial.print(val);
-        cmd = cmd + " X" + String(val, 3);
-        chk = true;
-    }
-    if (y != 0){
-        val = calculateDistance(y, feed);
-        cmd = cmd + " Y" + String(val, 3);
-        chk = true;
-    }
-    if (z != 0){
-        val = calculateDistance(z, feed);
-        cmd = cmd + " Z";
-        cmd = cmd + String(val, 3);
-        chk = true;
-    }
+String jog_build_cmd(float x, float y, float z, float mag2d){
+  bool chk = false;
+  String cmd  = "$J=G91";
+  float feed2d = calculateFeed(mag2d);
+  float feed;
+  float feedZ;
+  float vector3d[3] = {0,0,z};
 
-    cmd = cmd + " F" + String(feed, 0) + "\n";
-    if (chk == false){
-        return "";
+  Serial.print(x);
+  Serial.print("  ");
+  Serial.print(y);
+  Serial.print("  ");
+  Serial.println(z);
+  float val;
+  if (x != 0){
+    val = calculateDistance(x, feed2d);
+    vector3d[0] = val;
+    cmd = cmd + " X" + String(val, 3);
+    chk = true;
+  }
+  if (y != 0){
+    val = calculateDistance(y, feed2d);
+    vector3d[1] = val;
+    cmd = cmd + " Y" + String(val, 3);
+    chk = true;
+  }
+  if (z != 0){
+    cmd = cmd + " Z";
+    cmd = cmd + String(z, 3);
+    chk = true;
+    feedZ = abs(z * (60000 / float(SEND_INTERVAL)));
+    if (feed2d != 0){
+      // feed2d and feedZ from a vector, the magnitude is the new feed rate
+      float vec[2] = {feed2d, feedZ};
+      feed = magnitude(vec, 2);
+    } else { // only z movemnent - feed needs to be calculated
+      feed = feedZ;
     }
-    return cmd;
+  }else { // no z movemnent feed2d is the way to go
+    feed = feed2d;
+  }
+
+
+  cmd = cmd + " F" + String(feed, 0) + "\n";
+  if (chk == false){
+    return "";
+  }
+  return cmd;
 }
 
 // calcualte the feed rade based on joystick magnitude
@@ -174,3 +218,6 @@ float calculateDistance(float value, float feed){
     }
     return distance;
 }
+
+
+

@@ -78,6 +78,7 @@ extern UiPage setAxisyPage;
 extern UiPage setAxiszPage;
 extern UiPage menuPage;
 extern UiPage confirmHomingPage;
+extern UiPage runPage;
 
 extern UiPage* currentPage;
 

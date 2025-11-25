@@ -11,6 +11,6 @@ struct GrblStatus {
   float overRides[3];
   float position[MAX_AXIS];
 };
-void parseGrblStatusReport(String report);
+bool parseGrblStatusReport(String report);
 
 #endif
