@@ -44,55 +44,58 @@ void actionOff(){
   // }
   mode = 0;
   selectedIndex = cursorPosition;
-  drawScreen(cursorPosition);
+  // drawScreen(cursorPosition);
 }
 
 void actionMenu() {
-  nextPage = &menuPage;
+  currentPage = &menuPage;
   selectedIndex = -1;
   cursorPosition = 0;
   mode = 0;
 }
 void actionX() {
   selectedIndex = cursorPosition;
-  drawScreen(cursorPosition);
+  // drawScreen(cursorPosition);
+  initEncoder();
   mode = 2;
 }
 void actionY() {
   selectedIndex = cursorPosition;
-  drawScreen(cursorPosition);
+  // drawScreen(cursorPosition);
+  initEncoder();
   mode = 3;
 }
 void actionZ() {
   
   selectedIndex = cursorPosition;
-  drawScreen(cursorPosition);
+  // drawScreen(cursorPosition);
 }
 void actionJoy() {
   selectedIndex = cursorPosition;
-  drawScreen(cursorPosition);
+  // drawScreen(cursorPosition);
+  initJoystick();
   mode = 1;
 }
 void actionXPos() {
   mode = 0;
-  nextPage = &setAxisXPage;
-  drawScreen(0);
+  currentPage = &setAxisXPage;
+  // drawScreen(0);
   cursorPosition = 0;
   selectedIndex = -1;
   Serial.println("action");
 }
 void actionYPos() {
   mode = 0;
-  nextPage = &setAxisYPage;
-  drawScreen(0);
+  currentPage = &setAxisYPage;
+  // drawScreen(0);
   cursorPosition = 0;
   selectedIndex = -1;
   Serial.println("action");
 }
 void actionZPos() {
   mode = 0;
-  nextPage = &setAxisZPage;
-  drawScreen(0);
+  currentPage = &setAxisZPage;
+  // drawScreen(0);
   cursorPosition = 0;
   selectedIndex = -1;
   Serial.println("action");
@@ -130,8 +133,8 @@ void actionSetAxisZ(){
 }
 
 void actionHomingMenu() {
-  nextPage = &confirmHomingPage;
+  currentPage = &confirmHomingPage;
   cursorPosition = 0;
-  drawScreen(cursorPosition);
+  // drawScreen(cursorPosition);
   selectedIndex = -1;
 }

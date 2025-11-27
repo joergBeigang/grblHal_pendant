@@ -26,7 +26,10 @@ void encoderISR() {   // just remove IRAM_ATTR
   lastB = b;
 }
 
-
+// initialize the encoder to avoid unwanted movment when activating
+void initEncoder() {
+  lastPos = encoderPos;
+}
 
 // run every .1 sec
 void readJogEncoder(String axis){
@@ -36,7 +39,7 @@ void readJogEncoder(String axis){
   if (lastPos != encoderPos) {
     if (active == 0){
       Serial.println("active");
-      //        toggleEnable();
+      toggleEnable();
       active = 1;
     }
     // send jog command
@@ -68,8 +71,8 @@ void encoderOut(String axis) {
   float mm = (difference / (float(PULSES_PER_REVOLUTION) * 2)) * float(MM_PER_REVOLUTION);
   if (abs(mm) > shortestMove){
     String cmd = calculateCmd(mm, axis);
-    Serial.println(difference);
-    Serial.println(cmd);
+    // Serial.println(difference);
+    // Serial.println(cmd);
     // wsClient.sendTXT(cmd);
     // Serial1.write(cmd.c_str(), cmd.length());
     Serial2.print(cmd);

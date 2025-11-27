@@ -16,7 +16,13 @@ int joyXCenter = 1284;
 int joyYCenter = 1744;
 float joyXMax = 0.6; // max value for X axis
 float joyYMin = 0.85; // min value for Y axis
+int lastPosJoystick = 0;
+int difPosJoystick = 0;
 
+void initJoystick() {
+  lastPosJoystick = 0;
+  difPosJoystick = 0;
+}
 // main function to read the joystick and send jog commands
 void readJoystick(){
 
@@ -47,19 +53,18 @@ void readJoystick(){
   String cmd = jog_build_cmd(valueX, valueY, valueZ, mag2d);
   if (cmd != ""){
     Serial.println(cmd);
+    Serial2.print(cmd);
   }
 }
 
 // read the encoder and return the distance moved in mm
 float readJoystickEncoder(){
-  static int lastPos = 0;
-  static int difPos = 0;
-  if (lastPos != encoderPos) {
+  if (lastPosJoystick != encoderPos) {
     // send jog command
     
-    difPos = encoderPos - lastPos;
-    lastPos = encoderPos;
-    float mm = calculateJoystickEncoderDistance(difPos);
+    difPosJoystick = encoderPos - lastPosJoystick;
+    lastPosJoystick = encoderPos;
+    float mm = calculateJoystickEncoderDistance(difPosJoystick);
     return mm;
   }
   return 0.0;

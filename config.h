@@ -1,8 +1,8 @@
 
 
 // pins for uart communicatino with grblhal
-#define GRBL_RX 16  // GP1, receive from TinyBee TX
-#define GRBL_TX 17  // GP0, optional transmit to TinyBee RX
+#define GRBL_RX 16
+#define GRBL_TX 17
 
 // mm travel for each full ratation of the jog encoder
 #define MM_PER_REVOLUTION 5
