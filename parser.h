@@ -10,7 +10,9 @@ struct GrblStatus {
   float feedSpeed[2];
   float overRides[3];
   float position[MAX_AXIS];
+  int coordinateSystem;
 };
 bool parseGrblStatusReport(String report);
+bool parseGrblOutput(String report);
 
 #endif

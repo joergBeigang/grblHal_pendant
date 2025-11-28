@@ -144,8 +144,8 @@ UiPage setAxisZPage = {
 
 MenuItem menuMenu[] = {
     {.label = "Back", .x = 10,  .y = 10, .action = actionCancel, .submenu = nullptr },
-    {.label = "Reset", .x = 10,  .y = 25, .action = nullptr, .submenu = nullptr },
-    {.label = "Unlock", .x = 10, .y = 50, .action = nullptr, .submenu = nullptr},
+    {.label = "Reset", .x = 10,  .y = 25, .action = actionReset, .submenu = nullptr },
+    {.label = "Unlock", .x = 10, .y = 50, .action = actionUnlock, .submenu = nullptr},
     {.label = "Homing",  .x = 10, .y = 60, .action = actionHomingMenu,  .submenu = nullptr},
 };
 const int menuMenuCount = sizeof(menuMenu) / sizeof(MenuItem);
@@ -167,7 +167,7 @@ UiPage menuPage = {
 
 MenuItem confirmHomingMenu[] = {
     {.label = "Cancel", .x = 10,  .y = 50, .action = actionCancel, .submenu = nullptr },
-    {.label = "Confirm", .x = 70,  .y = 50, .action = nullptr, .submenu = nullptr },
+    {.label = "Confirm", .x = 70,  .y = 50, .action = actionHoming, .submenu = nullptr },
 };
 const int confirmHomingMenuCount = sizeof(confirmHomingMenu) / sizeof(MenuItem);
 

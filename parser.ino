@@ -43,11 +43,6 @@ void calculatePosition(){
 
 bool parseGrblStatusReport(String report){
     // is it a status report?
-    int start = report.indexOf('<');
-    int end = report.indexOf('>');
-    if (start == -1 || end == -1){
-      return false;
-    }
 
     // all upper case 
     report.toUpperCase();
@@ -87,3 +82,36 @@ bool parseGrblStatusReport(String report){
     return true;
 }
 
+int parseCoordinateSystem(String report) {
+
+    int index = report.indexOf("G5");
+    if (index == -1) {
+        return 9; // MPos not found
+    }
+    int start = index + 1;
+    // int start = mposIndex + 5; // Move pas "MPos:"
+    String co = report.substring((index +1),(index+3) );
+    return co.toInt();
+
+}
+
+bool parseGrblOutput(String report) {
+    // status report check
+    int start = report.indexOf('<');
+    int end = report.indexOf('>');
+    if (start != -1 || end != -1){
+      return parseGrblStatusReport(report);
+    }
+    // ok check
+    if (report.indexOf("ok") != -1) {
+      ok = true;
+    }
+    // coordinate system
+    start = report.indexOf('[');
+    end = report.indexOf(']');
+    if (start != -1 || end != -1){
+      grblStatus.coordinateSystem = parseCoordinateSystem(report);
+    }
+  return false;
+
+}

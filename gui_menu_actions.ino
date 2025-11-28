@@ -7,9 +7,20 @@
 // common actions
 // **********************
 
-void setAxis(int axis){
+// set an axis to a specified value
+void setAxisToValue(String axis) {
+  // get the active coordinate system
+  int co = grblStatus.coordinateSystem;
+  co -= 3;
 
+  // cmd = f"G10 L20 P{num} {direction} {value}"
+  String cmd = "G10 L20 P";
+  cmd += String(co);
+  cmd += axis;
+  cmd += String(valueEdit);
+  sendSingleCommand(cmd);
 }
+
 void actionSetValue(){
   if (setValueMode == false){
     setValueMode = true;
@@ -79,15 +90,16 @@ void actionJoy() {
 void actionXPos() {
   mode = 0;
   currentPage = &setAxisXPage;
-  // drawScreen(0);
+  // request the active coordinate system
+  sendSingleCommand("$G");
   cursorPosition = 0;
   selectedIndex = -1;
-  Serial.println("action");
 }
 void actionYPos() {
   mode = 0;
   currentPage = &setAxisYPage;
-  // drawScreen(0);
+  // request the active coordinate system
+  sendSingleCommand("$G");
   cursorPosition = 0;
   selectedIndex = -1;
   Serial.println("action");
@@ -95,7 +107,8 @@ void actionYPos() {
 void actionZPos() {
   mode = 0;
   currentPage = &setAxisZPage;
-  // drawScreen(0);
+  // request the active coordinate system
+  sendSingleCommand("$G");
   cursorPosition = 0;
   selectedIndex = -1;
   Serial.println("action");
@@ -106,7 +119,7 @@ void actionZPos() {
 // actions for set x axis
 // **********************
 void actionSetAxisX(){
-  setAxis(0);
+  setAxisToValue("X");
   valueEdit = 0;
   currentPage = &rootPage;
   selectedIndex = -1;
@@ -116,7 +129,7 @@ void actionSetAxisX(){
 // actions for set y axis
 // **********************
 void actionSetAxisY(){
-  setAxis(1);
+  setAxisToValue("Y");
   valueEdit = 0;
   currentPage = &rootPage;
   selectedIndex = -1;
@@ -126,15 +139,34 @@ void actionSetAxisY(){
 // actions for set x axis
 // **********************
 void actionSetAxisZ(){
-  setAxis(2);
+  setAxisToValue("Z");
   valueEdit = 0;
   currentPage = &rootPage;
   selectedIndex = -1;
 }
+
 
 void actionHomingMenu() {
   currentPage = &confirmHomingPage;
   cursorPosition = 0;
   // drawScreen(cursorPosition);
   selectedIndex = -1;
+}
+
+void actionHoming() {
+  sendSingleCommand("$H");
+}
+
+void actionReset() {
+  currentPage = &rootPage;
+  cursorPosition = 0;
+  uint8_t reset = 0x18; 
+  Serial2.write(reset);
+}
+
+void actionUnlock() {
+  currentPage = &rootPage;
+  cursorPosition = 0;
+  sendSingleCommand("$X");
+
 }

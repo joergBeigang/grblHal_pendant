@@ -41,6 +41,7 @@ void readJogEncoder(String axis){
     timerEncoderRest = millis();
     if (active == 0){
       Serial.println("active");
+      if (millis() - rtCmdTimer < 200) return;
       toggleEnable();
       active = 1;
     }

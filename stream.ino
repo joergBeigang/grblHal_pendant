@@ -12,20 +12,26 @@
 
 std::queue<String> grblQueue;
 
+String singleCommand = "";
+enum State { F1, F2, F3, DONE };
+State state = DONE;
+unsigned long t0;
+
 void sendToGrbl(const String &cmd) {
     grblQueue.push(cmd);
 }
 
 // being triggered at max speed
 void processQueue() {
-    if (!grblQueue.empty()) {
-      if (ok == true) {
-        ok = false;
-        String cmd = grblQueue.front();   // get oldest
-        Serial2.print(cmd);
-        grblQueue.pop();                  // remove it
-      }
+  Scheduler();
+  if (!grblQueue.empty()) {
+    if (ok == true && active == true) {
+      ok = false;
+      String cmd = grblQueue.front();   // get oldest
+      Serial2.print(cmd);
+      grblQueue.pop();                  // remove it
     }
+  }
 }
 
 // reset the queue after being stuck for a while
@@ -48,3 +54,61 @@ void clearQueue() {
     }
 }
 
+
+/*
+ * to send single commands UART mode must be activated before via real time 
+ * command. to make sure the real time commands are not being sent at a too 
+ * high frequency (which will crash grblHal) switching on uart, sending the 
+ * command and switching off uart, are being Scheduled with a some delay.
+ */
+
+void Scheduler() {
+  unsigned long now = millis();
+  switch(state) {
+    case F1:
+      if (now - t0 >= 200) {
+        task1();
+        state = F2;
+      }
+      t0 = millis();
+      break;
+
+    case F2:
+      if (now - t0 >= 100) {
+        task2();
+        state = F3;
+        t0 = millis();
+      }
+      break;
+
+    case F3:
+      if (now - t0 >= 300) {
+        task3();
+        state = DONE;
+        t0 = millis();
+      }
+      break;
+  }
+} 
+
+void task1(){
+  if (active == false) {
+    toggleEnable();
+    active = true;
+  }
+}
+void task2(){
+  sendToGrbl(singleCommand);
+}
+
+void task3(){
+  toggleEnable();
+  active = false;
+}
+
+
+void sendSingleCommand(String cmd) {
+  singleCommand = cmd;
+  t0 = millis();
+  state = F1;
+}

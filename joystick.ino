@@ -46,6 +46,8 @@ void readJoystick(){
   timerJoystickRest = millis();
   // input, but grblhal isn't listening, switch uart on
   if (active == false){
+    // first check if the last rt command wasn't to recent
+    if (millis() - rtCmdTimer < 200) return;
     toggleEnable();
     active = true;
   }
@@ -187,8 +189,6 @@ String jog_build_cmd(float x, float y, float z){
   if (chk == false){
     return "";
   }
-  Serial.println(mag3d);
-  Serial.println(cmd);
   return cmd;
 }
 

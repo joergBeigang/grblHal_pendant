@@ -11,10 +11,11 @@
 #include "gui_build.h"
 #include "gui_menu_actions.h"
 #include "ec11_encoder.h"
-#include "ec11_encoder.h"
+#include "stream.h"
 
 // if true = in control via uart
 volatile bool active = false;
+long rtCmdTimer = 0;
 
 // volatile UiPage* nextPage = nullptr;
 
@@ -75,6 +76,7 @@ void initGrblStatus(){
   grblStatus.overRides[0] = 100.0;
   grblStatus.overRides[1] = 100.0;
   grblStatus.overRides[2] = 100.0;
+  grblStatus.coordinateSystem = 54;
 }
 
 
@@ -115,9 +117,10 @@ void setup() {
 
   // send real time command 0x8B to enable/disable uart command
 void toggleEnable(){
+    
     uint8_t byteToSend = 0x8B;
     Serial2.write(byteToSend);
-    Serial.write(byteToSend);
+    rtCmdTimer = millis();
     Serial.println("ENABLE/DISABLE");
   }
 
@@ -181,17 +184,18 @@ void readUart(){
         // Serial.print("LINE: ");
         // Serial.println(grblInfo);
         // check for ok
-        if (grblInfo.indexOf("ok") != -1) {
-          ok = true;
-        }
+        // if (grblInfo.indexOf("ok") != -1) {
+        //   ok = true;
+        // }
 
-        bool chk = parseGrblStatusReport(grblInfo);
-        if (chk == true){
+        // bool chk = parseGrblStatusReport(grblInfo);
+        // if (chk == true){
           // set operation mode based on grbl status
           // setMode();
           // redraw the screen with the updated info
           // drawScreen(cursorPosition);  // redraw cursor
-        } 
+        // } 
+        bool chk = parseGrblOutput(grblInfo);
         grblInfo = "";    // reset after full line is received
     }
   }
@@ -215,6 +219,8 @@ void loop() {
     drawScreen(cursorPosition);
     // reset the timer
     timerJog = currentMillis;
+    // String testen = "[GC:G0 G59 G17 G21 G90 G94 M5 M9 T0 F0.0 S0]";
+    // parseGrblOutput(testen);
   }
 
 }
