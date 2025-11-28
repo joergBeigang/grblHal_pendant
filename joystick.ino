@@ -18,7 +18,7 @@ float joyXMax = 0.6; // max value for X axis
 float joyYMin = 0.85; // min value for Y axis
 int lastPosJoystick = 0;
 int difPosJoystick = 0;
-
+long timerJoystickRest = 0;
 void initJoystick() {
   lastPosJoystick = 0;
   difPosJoystick = 0;
@@ -35,12 +35,16 @@ void readJoystick(){
 
   // no input, switch off uart listening of grblhal
   if (valueX == 0.0 && valueY == 0.0 && valueZ == 0.0){
-    if (active == true){
-      active = false;
-      toggleEnable();
+    long currentMillis = millis();
+    if (currentMillis - timerJoystickRest >= 1000) {
+      if (active == true){
+        active = false;
+        toggleEnable();
+      } 
     } 
     return;
   } 
+  timerEncoderRest = millis();
   // input, but grblhal isn't listening, switch uart on
   if (active == false){
     toggleEnable();
@@ -53,7 +57,8 @@ void readJoystick(){
   String cmd = jog_build_cmd(valueX, valueY, valueZ, mag2d);
   if (cmd != ""){
     Serial.println(cmd);
-    Serial2.print(cmd);
+    // Serial2.print(cmd);
+    sendToGrbl(cmd);
   }
 }
 
@@ -172,6 +177,9 @@ String jog_build_cmd(float x, float y, float z, float mag2d){
   float val;
   if (x != 0){
     val = calculateDistance(x, feed2d);
+    Serial.println(x);
+    Serial.println(val);
+
     vector3d[0] = val;
     cmd = cmd + " X" + String(val, 3);
     chk = true;
@@ -182,24 +190,24 @@ String jog_build_cmd(float x, float y, float z, float mag2d){
     cmd = cmd + " Y" + String(val, 3);
     chk = true;
   }
-  if (z != 0){
-    cmd = cmd + " Z";
-    cmd = cmd + String(z, 3);
-    chk = true;
-    feedZ = abs(z * (60000 / float(SEND_INTERVAL)));
-    if (feed2d != 0){
-      // feed2d and feedZ from a vector, the magnitude is the new feed rate
-      float vec[2] = {feed2d, feedZ};
-      feed = magnitude(vec, 2);
-    } else { // only z movemnent - feed needs to be calculated
-      feed = feedZ;
-    }
-  }else { // no z movemnent feed2d is the way to go
-    feed = feed2d;
-  }
+  // if (z != 0){
+  //   cmd = cmd + " Z";
+  //   cmd = cmd + String(z, 3);
+  //   chk = true;
+  //   feedZ = abs(z * (60000 / float(SEND_INTERVAL)));
+  //   if (feed2d != 0){
+  //     // feed2d and feedZ from a vector, the magnitude is the new feed rate
+  //     float vec[2] = {feed2d, feedZ};
+  //     feed = magnitude(vec, 2);
+  //   } else { // only z movemnent - feed needs to be calculated
+  //     feed = feedZ;
+  //   }
+  // }else { // no z movemnent feed2d is the way to go
+  //   feed = feed2d;
+  // }
 
 
-  cmd = cmd + " F" + String(feed, 0) + "\n";
+  cmd = cmd + " F" + String(feed2d, 0) + "\n";
   if (chk == false){
     return "";
   }
@@ -217,7 +225,7 @@ float calculateFeed(float value){
 float calculateDistance(float value, float feed){ 
     // calculate distance
     float dt = 0.2;
-    float distance = feed / 60 * dt;
+    float distance = (feed / 60) * dt;
     if (value < 0){
         distance = distance * -1;
     }

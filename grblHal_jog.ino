@@ -11,6 +11,7 @@
 #include "gui_build.h"
 #include "gui_menu_actions.h"
 #include "ec11_encoder.h"
+#include "ec11_encoder.h"
 
 // if true = in control via uart
 volatile bool active = false;
@@ -20,7 +21,7 @@ volatile bool active = false;
 int cursorPosition = 0;          // where the cursor currently is
 // const long interval = float(SEND_INTERVAL);         // interval for sending jog commands in milliseconds
 
-
+bool ok = true;
 
 // mode = operation mode
 // 0 - off
@@ -179,6 +180,11 @@ void readUart(){
     if (c == '\n') {
         // Serial.print("LINE: ");
         // Serial.println(grblInfo);
+        // check for ok
+        if (grblInfo.indexOf("ok") != -1) {
+          ok = true;
+        }
+
         bool chk = parseGrblStatusReport(grblInfo);
         if (chk == true){
           // set operation mode based on grbl status
@@ -195,6 +201,7 @@ void loop() {
   rotaryMenuLoop();
   overRideSwitches();
   readUart();
+  processQueue();
 
   static unsigned long timerJog = 0;  // will store last time encoder was read
   unsigned long currentMillis = millis();

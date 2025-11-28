@@ -1,4 +1,3 @@
-// String grblStatus = "";
 
 
 void parseGrblState(const String &info) {

@@ -13,6 +13,7 @@ const long interval = float(SEND_INTERVAL);         // interval for sending jog 
 
 long timerEncoder = 0;
 long timerEncoderRest  = 0;
+int activeCounter = 0;
 
 // interrupt based encoder reading
 void encoderISR() {   // just remove IRAM_ATTR
@@ -37,6 +38,7 @@ void readJogEncoder(String axis){
   Serial.println(encoderPos);
   // Set active if encoder moved (based on encoderPos change)
   if (lastPos != encoderPos) {
+    timerEncoderRest = millis();
     if (active == 0){
       Serial.println("active");
       toggleEnable();
@@ -47,12 +49,15 @@ void readJogEncoder(String axis){
     lastPos = encoderPos;
   }
   else{
- // if (currentMillis - timerEncoderRest >= 1000) {
- // switch off uart mode
-    if (active == 1){
-      active = 0;
-      toggleEnable();
-      Serial.println("off");
+    long currentMillis = millis();
+    if (currentMillis - timerEncoderRest >= 1000) {
+    // switch off uart mode
+        if (active == 1){
+            active = 0;
+            toggleEnable();
+            Serial.println("off");
+            activeCounter = 0;
+          }
     }
   }
 }
@@ -75,14 +80,15 @@ void encoderOut(String axis) {
     // Serial.println(cmd);
     // wsClient.sendTXT(cmd);
     // Serial1.write(cmd.c_str(), cmd.length());
-    Serial2.print(cmd);
+    // Serial2.print(cmd);
+    sendToGrbl(cmd);
   }
   lastPos = encoderPos;
 }
 
 // builds the command with correct feedrate
 String calculateCmd(float mm, String axis){
-  float feed = abs(mm * (60000 / float(interval)));
+  float feed = abs(mm * (60000 / float(interval)))*1.2;
   String cmd = "$J=G91 ";
   cmd += axis;
   cmd += mm;
