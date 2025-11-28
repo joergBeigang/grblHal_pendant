@@ -219,8 +219,6 @@ void loop() {
     drawScreen(cursorPosition);
     // reset the timer
     timerJog = currentMillis;
-    // String testen = "[GC:G0 G59 G17 G21 G90 G94 M5 M9 T0 F0.0 S0]";
-    // parseGrblOutput(testen);
   }
 
 }

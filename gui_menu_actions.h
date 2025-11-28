@@ -11,8 +11,13 @@ void actionXPos();
 void actionYPos();
 void actionZPos();
 
+void actionUnlock();
+void actionReset();
+void actionHoming();
+void actionHomingMenu();
 void actionConfimrHomingMenu();
-
+void actionSetAxisZ();
+void actionSetAxisY();
 void actionSetAxisX();
 void actionCancel();
 extern UiPage* currentPage;
