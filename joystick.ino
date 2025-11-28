@@ -14,8 +14,6 @@
 
 int joyXCenter = 1284;
 int joyYCenter = 1744;
-float joyXMax = 0.6; // max value for X axis
-float joyYMin = 0.85; // min value for Y axis
 int lastPosJoystick = 0;
 int difPosJoystick = 0;
 long timerJoystickRest = 0;
@@ -29,7 +27,7 @@ void readJoystick(){
   // prepareJoystickValue returns a normalized float
   // float value, float minVal, float maxVal, float centerZone, float center, float blend
   float valueX = prepareJoystickValue(analogRead(JOY_X_PIN), .25, .31, .1,joyXCenter, .8);
-  float valueY = prepareJoystickValue(analogRead(JOY_Y_PIN), .39, .48, .1,joyYCenter, .8);
+  float valueY = prepareJoystickValue(analogRead(JOY_Y_PIN), .35, .52, .15,joyYCenter, .8);
   // readJoystickEncoder returns a distance in mm
   float valueZ = readJoystickEncoder();
 
@@ -38,13 +36,14 @@ void readJoystick(){
     long currentMillis = millis();
     if (currentMillis - timerJoystickRest >= 1000) {
       if (active == true){
+        Serial.println("off");
         active = false;
         toggleEnable();
       } 
     } 
     return;
   } 
-  timerEncoderRest = millis();
+  timerJoystickRest = millis();
   // input, but grblhal isn't listening, switch uart on
   if (active == false){
     toggleEnable();
@@ -52,11 +51,9 @@ void readJoystick(){
   }
 
   // float vec[3] = {valueX, valueY, valueZ};
-  float vec[2] = {valueX, valueY};
-  float mag2d = magnitude(vec, 2);
-  String cmd = jog_build_cmd(valueX, valueY, valueZ, mag2d);
+  String cmd = jog_build_cmd(valueX, valueY, valueZ);
   if (cmd != ""){
-    Serial.println(cmd);
+    // Serial.println(cmd);
     // Serial2.print(cmd);
     sendToGrbl(cmd);
   }
@@ -161,56 +158,37 @@ float mapJoystickValue(float value, float minVal, float maxVal, float centerZone
     }
 
 // builds the jog command for grblHAL
-String jog_build_cmd(float x, float y, float z, float mag2d){
+String jog_build_cmd(float x, float y, float z){
+  float distMultiplier = 3; //speed of joystick jogging 
+  x = x * distMultiplier;
+  y = y * distMultiplier;
+  float vec[3] = {x,y,z};
+  float mag3d = magnitude(vec, 3);
+
   bool chk = false;
   String cmd  = "$J=G91";
-  float feed2d = calculateFeed(mag2d);
-  float feed;
-  float feedZ;
-  float vector3d[3] = {0,0,z};
+  // float feed2d = calculateFeed(mag2d);
+  const long interval = float(SEND_INTERVAL);         // interval for sending jog commands in milliseconds
+  float feed = abs(mag3d * (60000/interval));
 
-  Serial.print(x);
-  Serial.print("  ");
-  Serial.print(y);
-  Serial.print("  ");
-  Serial.println(z);
-  float val;
   if (x != 0){
-    val = calculateDistance(x, feed2d);
-    Serial.println(x);
-    Serial.println(val);
-
-    vector3d[0] = val;
-    cmd = cmd + " X" + String(val, 3);
+    cmd = cmd + " X" + String(x, 3);
     chk = true;
   }
   if (y != 0){
-    val = calculateDistance(y, feed2d);
-    vector3d[1] = val;
-    cmd = cmd + " Y" + String(val, 3);
+    cmd = cmd + " Y" + String(y, 3);
     chk = true;
   }
-  // if (z != 0){
-  //   cmd = cmd + " Z";
-  //   cmd = cmd + String(z, 3);
-  //   chk = true;
-  //   feedZ = abs(z * (60000 / float(SEND_INTERVAL)));
-  //   if (feed2d != 0){
-  //     // feed2d and feedZ from a vector, the magnitude is the new feed rate
-  //     float vec[2] = {feed2d, feedZ};
-  //     feed = magnitude(vec, 2);
-  //   } else { // only z movemnent - feed needs to be calculated
-  //     feed = feedZ;
-  //   }
-  // }else { // no z movemnent feed2d is the way to go
-  //   feed = feed2d;
-  // }
-
-
-  cmd = cmd + " F" + String(feed2d, 0) + "\n";
+  if (z != 0){
+    cmd = cmd + " Z" + String(z, 3);
+    chk = true;
+  }
+  cmd = cmd + " F" + String(feed, 0) + "\n";
   if (chk == false){
     return "";
   }
+  Serial.println(mag3d);
+  Serial.println(cmd);
   return cmd;
 }
 
