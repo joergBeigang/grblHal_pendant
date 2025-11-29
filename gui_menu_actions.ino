@@ -7,18 +7,27 @@
 // common actions
 // **********************
 
+// activate UAERT mode and keep it active
+void activateUartMode() {
+  keepActive = true;
+  if (active == false) {
+    toggleEnable();
+    active = true;
+  }
+}
 // set an axis to a specified value
 void setAxisToValue(String axis) {
   // get the active coordinate system
   int co = grblStatus.coordinateSystem;
-  co -= 3;
-
+  co -= 53; // G54 = 1, G55 = 2 and so on
   // cmd = f"G10 L20 P{num} {direction} {value}"
   String cmd = "G10 L20 P";
   cmd += String(co);
   cmd += axis;
   cmd += String(valueEdit);
-  sendSingleCommand(cmd);
+  cmd += "\n";
+  sendToGrbl(cmd);
+  keepActive = false;
 }
 
 void actionSetValue(){
@@ -32,13 +41,14 @@ void actionSetValue(){
 }
 
 void actionCancel(){
-      Serial.println("cancel");
-    Serial.printf("currentPage=%p, parent=%p\n", currentPage, currentPage->parent);
+  Serial.println("cancel");
+  Serial.printf("currentPage=%p, parent=%p\n", currentPage, currentPage->parent);
   Serial.println("cancel");
   valueEdit = 0;
   // currentPage = &rootPage;
   currentPage = currentPage -> parent;
   selectedIndex = -1;
+  keepActive = false;
   // nextPage = &rootPage;
 }
 
@@ -49,17 +59,13 @@ void actionCancel(){
 // actions for main menu items
 // **********************
 void actionOff(){
-  // for (int i = 0; i<rootMenuCount; i++){
-  //   MenuItem &item = rootMenu[i];
-  //   // item.selected = (i == cursorPosition);
-  // }
   mode = 0;
   selectedIndex = cursorPosition;
-  // drawScreen(cursorPosition);
 }
 
 void actionMenu() {
   currentPage = &menuPage;
+  activateUartMode();
   selectedIndex = -1;
   cursorPosition = 0;
   mode = 0;
@@ -87,31 +93,36 @@ void actionJoy() {
   initJoystick();
   mode = 1;
 }
+
 void actionXPos() {
   mode = 0;
   currentPage = &setAxisXPage;
   // request the active coordinate system
-  sendSingleCommand("$G");
   cursorPosition = 0;
   selectedIndex = -1;
+  activateUartMode();
+  sendToGrbl("$G");
 }
+
 void actionYPos() {
   mode = 0;
   currentPage = &setAxisYPage;
   // request the active coordinate system
-  sendSingleCommand("$G");
   cursorPosition = 0;
   selectedIndex = -1;
   Serial.println("action");
+  activateUartMode();
+  sendToGrbl("$G");
 }
 void actionZPos() {
   mode = 0;
   currentPage = &setAxisZPage;
   // request the active coordinate system
-  sendSingleCommand("$G");
   cursorPosition = 0;
   selectedIndex = -1;
-  Serial.println("action");
+  mode = 0;
+  activateUartMode();
+  sendToGrbl("$G");
 }
 
 
@@ -123,6 +134,7 @@ void actionSetAxisX(){
   valueEdit = 0;
   currentPage = &rootPage;
   selectedIndex = -1;
+  mode = 0;
 }
 
 // **********************
@@ -133,6 +145,7 @@ void actionSetAxisY(){
   valueEdit = 0;
   currentPage = &rootPage;
   selectedIndex = -1;
+  mode = 0;
 }
 
 // **********************
@@ -142,31 +155,46 @@ void actionSetAxisZ(){
   setAxisToValue("Z");
   valueEdit = 0;
   currentPage = &rootPage;
+  mode = 0;
   selectedIndex = -1;
+  keepActive = false;
 }
 
 
 void actionHomingMenu() {
   currentPage = &confirmHomingPage;
   cursorPosition = 0;
+  mode = 0;
   // drawScreen(cursorPosition);
   selectedIndex = -1;
 }
 
 void actionHoming() {
-  sendSingleCommand("$H");
+  currentPage = &rootPage;
+  cursorPosition = 0;
+  sendToGrbl("$H\n");
+  selectedIndex = 1;
+  keepActive = false;
+  mode = 0;
+
 }
 
 void actionReset() {
   currentPage = &rootPage;
   cursorPosition = 0;
+  selectedIndex = 1;
+  mode = 0;
   uint8_t reset = 0x18; 
   Serial2.write(reset);
+  keepActive = false;
 }
 
 void actionUnlock() {
   currentPage = &rootPage;
   cursorPosition = 0;
-  sendSingleCommand("$X");
+  sendToGrbl("$X\n");
+  selectedIndex = 1;
+  keepActive = false;
+  mode = 0;
 
 }

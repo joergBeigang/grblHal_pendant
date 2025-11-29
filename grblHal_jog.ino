@@ -15,13 +15,24 @@
 
 // if true = in control via uart
 volatile bool active = false;
+
+// to keep UART active while
+volatile bool keepActive = false; 
+
+// timer for real time command, used for swtiching on in 
+// joystick and encoder reading to avoid too fast switching
+// and grblHal freezing
 long rtCmdTimer = 0;
 
-// volatile UiPage* nextPage = nullptr;
+// timer for swtiching off UART Mode. 
+// needs to be reset to keep UART active
+// used for jogging with encoder and joyustick
+long timerEncoderRest  = 0;
 
-int cursorPosition = 0;          // where the cursor currently is
-// const long interval = float(SEND_INTERVAL);         // interval for sending jog commands in milliseconds
+// position of the cursor in the menu
+int cursorPosition = 0; 
 
+// ok response from grblHAL received
 bool ok = true;
 
 // mode = operation mode
@@ -117,13 +128,32 @@ void setup() {
 
   // send real time command 0x8B to enable/disable uart command
 void toggleEnable(){
-    
-    uint8_t byteToSend = 0x8B;
-    Serial2.write(byteToSend);
-    rtCmdTimer = millis();
-    Serial.println("ENABLE/DISABLE");
-  }
+  active = !active;
+  uint8_t byteToSend = 0x8B;
+  Serial2.write(byteToSend);
+  rtCmdTimer = millis();
+  Serial.println("ENABLE/DISABLE");
+  Serial.println(active);
 
+  if (active == true) {
+    timerEncoderRest = millis();
+  }
+}
+
+void disableTimer(){
+  if (keepActive == true) {
+    timerEncoderRest = millis();
+  };
+  long currentMillis = millis();
+  if (currentMillis - timerEncoderRest >= 1000) {
+  // switch off uart mode
+      if (active == 1){
+        resetQueue();
+        toggleEnable();
+        Serial.println("off");
+      }
+  }
+}
 
 // triggered every .1 seconds
 void modeLogic(){
@@ -169,7 +199,7 @@ void setMode(){
 
   // some other state like alarm, door open etc. 
   // jogging is switched off
-  mode = 0;
+  // mode = 0;
 }
 
 
@@ -191,7 +221,7 @@ void readUart(){
         // bool chk = parseGrblStatusReport(grblInfo);
         // if (chk == true){
           // set operation mode based on grbl status
-          // setMode();
+          setMode();
           // redraw the screen with the updated info
           // drawScreen(cursorPosition);  // redraw cursor
         // } 
@@ -202,6 +232,7 @@ void readUart(){
 }
 
 void loop() {
+  disableTimer();
   rotaryMenuLoop();
   overRideSwitches();
   readUart();

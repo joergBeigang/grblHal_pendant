@@ -6,14 +6,10 @@ float shortestMove = 0.005;  // the shortest move that is being sent via jog
 volatile int32_t encoderPos = 0;
 String jogAxis = "x";
 long lastPos = 0;           // Changed to non-static for access from main.ino
-//volatile bool lastA = 0;
-//volatile bool lastB = 0;
 
 const long interval = float(SEND_INTERVAL);         // interval for sending jog commands in milliseconds
 
 long timerEncoder = 0;
-long timerEncoderRest  = 0;
-int activeCounter = 0;
 
 // interrupt based encoder reading
 void encoderISR() {   // just remove IRAM_ATTR
@@ -35,7 +31,6 @@ void initEncoder() {
 // run every .1 sec
 void readJogEncoder(String axis){
   static int32_t lastPos = 0;
-  Serial.println(encoderPos);
   // Set active if encoder moved (based on encoderPos change)
   if (lastPos != encoderPos) {
     timerEncoderRest = millis();
@@ -49,18 +44,6 @@ void readJogEncoder(String axis){
     encoderOut(axis);
     lastPos = encoderPos;
   }
-  else{
-    long currentMillis = millis();
-    if (currentMillis - timerEncoderRest >= 1000) {
-    // switch off uart mode
-        if (active == 1){
-            active = 0;
-            toggleEnable();
-            Serial.println("off");
-            activeCounter = 0;
-          }
-    }
-  }
 }
 
 /* 
@@ -68,20 +51,10 @@ void readJogEncoder(String axis){
  * it is triggered every 100ms from the main loop via readJogEncoder()
  */
 void encoderOut(String axis) {
-  // uint8_t info = 0x80;
-  // Serial1.write(info);  
-  // if (encoderPos == lastPos) {
-  //   return;  // No change in position
-  // }
   float difference = lastPos - encoderPos;
   float mm = (difference / (float(PULSES_PER_REVOLUTION) * 2)) * float(MM_PER_REVOLUTION);
   if (abs(mm) > shortestMove){
     String cmd = calculateCmd(mm, axis);
-    // Serial.println(difference);
-    // Serial.println(cmd);
-    // wsClient.sendTXT(cmd);
-    // Serial1.write(cmd.c_str(), cmd.length());
-    // Serial2.print(cmd);
     sendToGrbl(cmd);
   }
   lastPos = encoderPos;

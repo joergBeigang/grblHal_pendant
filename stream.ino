@@ -13,8 +13,7 @@
 std::queue<String> grblQueue;
 
 String singleCommand = "";
-enum State { F1, F2, F3, DONE };
-State state = DONE;
+int state = -1;
 unsigned long t0;
 
 void sendToGrbl(const String &cmd) {
@@ -65,26 +64,28 @@ void clearQueue() {
 void Scheduler() {
   unsigned long now = millis();
   switch(state) {
-    case F1:
+    case 0:
       if (now - t0 >= 200) {
-        task1();
-        state = F2;
-      }
-      t0 = millis();
-      break;
 
-    case F2:
-      if (now - t0 >= 100) {
-        task2();
-        state = F3;
+        Serial.println("schedule task1");
+        task1();
+        state ++;
         t0 = millis();
       }
       break;
 
-    case F3:
-      if (now - t0 >= 300) {
+    case 1:
+      if (now - t0 >= 200) {
+        task2();
+        state ++;
+        t0 = millis();
+      }
+      break;
+
+    case 2:
+      if (now - t0 >= 500) {
         task3();
-        state = DONE;
+        state = -1;
         t0 = millis();
       }
       break;
@@ -92,23 +93,28 @@ void Scheduler() {
 } 
 
 void task1(){
+  Serial.println("activate");
   if (active == false) {
     toggleEnable();
     active = true;
+
   }
 }
 void task2(){
+  Serial.println("send command");
+  Serial.println(singleCommand);
   sendToGrbl(singleCommand);
 }
 
 void task3(){
+  Serial.println("deactivate");
   toggleEnable();
   active = false;
 }
 
 
 void sendSingleCommand(String cmd) {
+  Serial.println(cmd);
   singleCommand = cmd;
-  t0 = millis();
-  state = F1;
+  state = 0;
 }

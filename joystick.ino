@@ -16,7 +16,6 @@ int joyXCenter = 1284;
 int joyYCenter = 1744;
 int lastPosJoystick = 0;
 int difPosJoystick = 0;
-long timerJoystickRest = 0;
 void initJoystick() {
   lastPosJoystick = 0;
   difPosJoystick = 0;
@@ -33,17 +32,9 @@ void readJoystick(){
 
   // no input, switch off uart listening of grblhal
   if (valueX == 0.0 && valueY == 0.0 && valueZ == 0.0){
-    long currentMillis = millis();
-    if (currentMillis - timerJoystickRest >= 1000) {
-      if (active == true){
-        Serial.println("off");
-        active = false;
-        toggleEnable();
-      } 
-    } 
     return;
   } 
-  timerJoystickRest = millis();
+  timerEncoderRest = millis();
   // input, but grblhal isn't listening, switch uart on
   if (active == false){
     // first check if the last rt command wasn't to recent
