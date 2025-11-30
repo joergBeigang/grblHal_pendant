@@ -96,22 +96,38 @@ int parseCoordinateSystem(String report) {
 }
 
 bool parseGrblOutput(String report) {
-    // status report check
-    int start = report.indexOf('<');
-    int end = report.indexOf('>');
-    if (start != -1 || end != -1){
-      return parseGrblStatusReport(report);
+
+  // status report check
+  int start = report.indexOf('<');
+  int end = report.indexOf('>');
+  if (start != -1 || end != -1){
+    // first check if UAERT is active or not
+    int uart =report.indexOf("MPG:0");
+    if (uart != -1) {
+      active = false;
+      grblStatus.uartMode = 0;
     }
-    // ok check
-    if (report.indexOf("ok") != -1) {
-      ok = true;
+    uart =report.indexOf("MPG:1");
+    if (uart != -1) {
+      active = true;
+      grblStatus.uartMode = 1;
     }
-    // coordinate system
-    start = report.indexOf('[');
-    end = report.indexOf(']');
-    if (start != -1 || end != -1){
-      grblStatus.coordinateSystem = parseCoordinateSystem(report);
-    }
+    return parseGrblStatusReport(report);
+  }
+  // ok check
+  if (report.indexOf("ok") != -1) {
+    ok = true;
+    return true;
+
+  }
+  // coordinate system
+  start = report.indexOf('[');
+  end = report.indexOf(']');
+  if (start != -1 || end != -1){
+    grblStatus.coordinateSystem = parseCoordinateSystem(report);
+    return true;
+  }
+  // check uart mode
   return false;
 
 }

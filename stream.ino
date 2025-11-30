@@ -40,17 +40,10 @@ void processQueue() {
 // after one second. No extra time needed, the switch off active timer
 // can be relied on.
 void resetQueue() {
-  if (active == false && ok == false) {
-    clearQueue();
-    ok = true;
-  }
-}
-
-// clear the queue
-void clearQueue() {
     while (!grblQueue.empty()) {
         grblQueue.pop();
     }
+    ok = true;
 }
 
 

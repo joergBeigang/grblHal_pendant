@@ -17,12 +17,16 @@ int joyYCenter = 1744;
 int lastPosJoystick = 0;
 int difPosJoystick = 0;
 void initJoystick() {
-  lastPosJoystick = 0;
+  resetQueue();
+  lastPosJoystick = encoderPos;
   difPosJoystick = 0;
 }
 // main function to read the joystick and send jog commands
 void readJoystick(){
-
+  Serial.print("X  ");
+  Serial.println(calibrateRead(int(JOY_X_PIN)));
+  // Serial.print("y  ");
+  // Serial.println(calibrateRead(int(JOY_Y_PIN)));
   // prepareJoystickValue returns a normalized float
   // float value, float minVal, float maxVal, float centerZone, float center, float blend
   float valueX = prepareJoystickValue(analogRead(JOY_X_PIN), .25, .31, .1,joyXCenter, .8);
@@ -30,7 +34,7 @@ void readJoystick(){
   // readJoystickEncoder returns a distance in mm
   float valueZ = readJoystickEncoder();
 
-  // no input, switch off uart listening of grblhal
+  // no input, do nothing.
   if (valueX == 0.0 && valueY == 0.0 && valueZ == 0.0){
     return;
   } 
@@ -40,7 +44,6 @@ void readJoystick(){
     // first check if the last rt command wasn't to recent
     if (millis() - rtCmdTimer < 200) return;
     toggleEnable();
-    active = true;
   }
 
   // float vec[3] = {valueX, valueY, valueZ};
@@ -202,4 +205,11 @@ float calculateDistance(float value, float feed){
 }
 
 
+int calibrateRead(int pin) {
+  unsigned int readX;
+  for (int i = 0; i < 100; i++) {
+    readX += analogRead(pin);
+  }
+  return int(float(readX) / 100.0);
+}
 

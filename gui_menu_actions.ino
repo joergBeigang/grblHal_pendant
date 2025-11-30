@@ -3,20 +3,21 @@
 #include "gui_build.h"
 
 
-// **********************
+// *****************************************************
 // common actions
-// **********************
+// *****************************************************
 
 // activate UAERT mode and keep it active
 void activateUartMode() {
   keepActive = true;
   if (active == false) {
     toggleEnable();
-    active = true;
+    // active = true;
   }
 }
 // set an axis to a specified value
 void setAxisToValue(String axis) {
+  keepActive = false;
   // get the active coordinate system
   int co = grblStatus.coordinateSystem;
   co -= 53; // G54 = 1, G55 = 2 and so on
@@ -27,7 +28,6 @@ void setAxisToValue(String axis) {
   cmd += String(valueEdit);
   cmd += "\n";
   sendToGrbl(cmd);
-  keepActive = false;
 }
 
 void actionSetValue(){
@@ -55,9 +55,9 @@ void actionCancel(){
 
 
 
-// **********************
+// *****************************************************
 // actions for main menu items
-// **********************
+// *****************************************************
 void actionOff(){
   mode = 0;
   selectedIndex = cursorPosition;
@@ -94,6 +94,10 @@ void actionJoy() {
   mode = 1;
 }
 
+// *****************************************************
+// Actions for reset axis position
+// *****************************************************
+
 void actionXPos() {
   mode = 0;
   currentPage = &setAxisXPage;
@@ -101,7 +105,9 @@ void actionXPos() {
   cursorPosition = 0;
   selectedIndex = -1;
   activateUartMode();
-  sendToGrbl("$G");
+  uint8_t request = 0x83; 
+  Serial2.write(request);
+      
 }
 
 void actionYPos() {
@@ -112,7 +118,8 @@ void actionYPos() {
   selectedIndex = -1;
   Serial.println("action");
   activateUartMode();
-  sendToGrbl("$G");
+  uint8_t request = 0x83; 
+  Serial2.write(request);
 }
 void actionZPos() {
   mode = 0;
@@ -122,7 +129,8 @@ void actionZPos() {
   selectedIndex = -1;
   mode = 0;
   activateUartMode();
-  sendToGrbl("$G");
+  uint8_t request = 0x83; 
+  Serial2.write(request);
 }
 
 
@@ -135,6 +143,7 @@ void actionSetAxisX(){
   currentPage = &rootPage;
   selectedIndex = -1;
   mode = 0;
+  keepActive = false;
 }
 
 // **********************
@@ -146,6 +155,7 @@ void actionSetAxisY(){
   currentPage = &rootPage;
   selectedIndex = -1;
   mode = 0;
+  keepActive = false;
 }
 
 // **********************
@@ -198,3 +208,38 @@ void actionUnlock() {
   mode = 0;
 
 }
+
+
+// *****************************************************
+// actions for run mode
+// *****************************************************
+void actionPause(){
+  uint8_t feedHold = 0x82;
+  Serial2.write(feedHold);
+  mode = 5;
+}
+
+void actionResume(){
+  if (mode == 5) return;
+  uint8_t cycleStart = 0x81;
+  Serial2.write(cycleStart);
+  mode = 5;
+}
+
+void actionStopMenu(){
+  currentPage = &confirmStopPage;
+  cursorPosition = 0;
+  mode = 0;
+  // drawScreen(cursorPosition);
+  selectedIndex = -1;
+}
+
+
+
+void actionStop(){
+  uint8_t stop = 0x88; 
+  Serial2.write(stop);
+  mode = 0;
+  currentPage = &rootPage;
+}
+

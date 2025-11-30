@@ -47,6 +47,8 @@ UiDynamicItem rootDynamicUi[] = {
     {"Spindle:", u8g2_font_4x6_tr, 70, 43, &grblStatus.overRides[1], nullptr,0},
     {"Rapid:",u8g2_font_4x6_tr, 110, 43, &grblStatus.overRides[2], nullptr,0},
     {"State:",u8g2_font_profont12_tr  , 56, 30, nullptr, &grblStatus.status},
+    {"active:",u8g2_font_profont12_tr  , 86, 30, &grblStatus.uartMode, nullptr },
+
   };
 
 const int rootDynamicUiCount = sizeof(rootDynamicUi) / sizeof(UiDynamicItem);
@@ -67,13 +69,29 @@ UiPage rootPage = {
 // ********************
 
 
-MenuItem setAxisMenu[] = {
+MenuItem setAxisXMenu[] = {
     {.label = "123.123", .x = 40,  .y = 33, .action = actionSetValue, .submenu = nullptr, .value = pValueEdit},
     // {.label = "0.0", .x = 40, .y = 30, .action = actionSetValue, .submenu = nullptr},
     {.label = "Cancel", .x = 3, .y = 60, .action = actionCancel, .submenu = nullptr},
     {.label = "Set",  .x = 50, .y = 60, .action = actionSetAxisX,  .submenu = nullptr},
 };
-const int setAxisMenuCount = sizeof(setAxisMenu) / sizeof(MenuItem);
+const int setAxisXMenuCount = sizeof(setAxisXMenu) / sizeof(MenuItem);
+
+MenuItem setAxisYMenu[] = {
+    {.label = "123.123", .x = 40,  .y = 33, .action = actionSetValue, .submenu = nullptr, .value = pValueEdit},
+    // {.label = "0.0", .x = 40, .y = 30, .action = actionSetValue, .submenu = nullptr},
+    {.label = "Cancel", .x = 3, .y = 60, .action = actionCancel, .submenu = nullptr},
+    {.label = "Set",  .x = 50, .y = 60, .action = actionSetAxisY,  .submenu = nullptr},
+};
+const int setAxisYMenuCount = sizeof(setAxisYMenu) / sizeof(MenuItem);
+
+MenuItem setAxisZMenu[] = {
+    {.label = "123.123", .x = 40,  .y = 33, .action = actionSetValue, .submenu = nullptr, .value = pValueEdit},
+    // {.label = "0.0", .x = 40, .y = 30, .action = actionSetValue, .submenu = nullptr},
+    {.label = "Cancel", .x = 3, .y = 60, .action = actionCancel, .submenu = nullptr},
+    {.label = "Set",  .x = 50, .y = 60, .action = actionSetAxisZ,  .submenu = nullptr},
+};
+const int setAxisZMenuCount = sizeof(setAxisZMenu) / sizeof(MenuItem);
 
 UiItem setAxisXUI[] = {
     {.label = "Set X Axis", .font = u8g2_font_profont12_tr, .x = 30, .y = 15},
@@ -96,8 +114,8 @@ const int setAxisZUICount = sizeof(setAxisZUI) / sizeof(UiItem);
 
 UiPage setAxisXPage = {
   "Set Axis",
-  setAxisMenu,
-  setAxisMenuCount,
+  setAxisXMenu,
+  setAxisXMenuCount,
   setAxisXUI,
   setAxisXUICount,
   emptyDynUI,
@@ -111,8 +129,8 @@ UiPage setAxisXPage = {
 
 UiPage setAxisYPage = {
   "Set Axis",
-  setAxisMenu,
-  setAxisMenuCount,
+  setAxisYMenu,
+  setAxisYMenuCount,
   setAxisYUI,
   setAxisYUICount,
   emptyDynUI,
@@ -126,8 +144,8 @@ UiPage setAxisYPage = {
 
 UiPage setAxisZPage = {
   "Set Axis",
-  setAxisMenu,
-  setAxisMenuCount,
+  setAxisZMenu,
+  setAxisZMenuCount,
   setAxisZUI,
   setAxisZUICount,
   emptyDynUI,
@@ -139,14 +157,15 @@ UiPage setAxisZPage = {
 
 
 // **************
-// menu 
+// menu Page
 // **************
 
 MenuItem menuMenu[] = {
     {.label = "Back", .x = 10,  .y = 10, .action = actionCancel, .submenu = nullptr },
-    {.label = "Reset", .x = 10,  .y = 25, .action = actionReset, .submenu = nullptr },
-    {.label = "Unlock", .x = 10, .y = 50, .action = actionUnlock, .submenu = nullptr},
-    {.label = "Homing",  .x = 10, .y = 60, .action = actionHomingMenu,  .submenu = nullptr},
+    {.label = "Reset", .x = 10,  .y = 23, .action = actionReset, .submenu = nullptr },
+    {.label = "Unlock", .x = 10, .y = 36, .action = actionUnlock, .submenu = nullptr},
+    {.label = "Homing",  .x = 10, .y = 49, .action = actionHomingMenu,  .submenu = nullptr},
+    {.label = "Settings",  .x = 10, .y = 62, .action = actionHomingMenu,  .submenu = nullptr},
 };
 const int menuMenuCount = sizeof(menuMenu) / sizeof(MenuItem);
 
@@ -188,14 +207,15 @@ UiPage confirmHomingPage = {
 };
 
 
-// ***************
+// ******************************************************
 // run code screen
-// ***************
+// ******************************************************
 
 
 MenuItem runMenu[] = {
-    {.label = "Pause", .x = 3, .y = 60, .action = actionMenu, .submenu = nullptr},
-    {.label = "Resume",  .x = 30, .y = 60, .action = actionOff,  .submenu = nullptr},
+    {.label = "Pause", .x = 3, .y = 60, .action = actionPause, .submenu = nullptr},
+    {.label = "Resume",  .x = 30, .y = 60, .action = actionResume,  .submenu = nullptr},
+    {.label = "Stop",  .x = 60, .y = 60, .action = actionStopMenu,  .submenu = nullptr},
 };
 
 const int runMenuCount = sizeof(runMenu) / sizeof(MenuItem);
@@ -223,6 +243,71 @@ UiPage runPage = {
   runDynamicUiCount,
   &rootPage
 };
+
+
+// **************
+// confirm Stop
+// **************
+
+MenuItem confirmStopMenu[] = {
+    {.label = "Cancel", .x = 10,  .y = 50, .action = actionCancel, .submenu = nullptr },
+    {.label = "Confirm", .x = 70,  .y = 50, .action = actionStop, .submenu = nullptr },
+};
+const int confirmStopMenuCount = sizeof(confirmHomingMenu) / sizeof(MenuItem);
+
+UiItem confirmStopUI[] = {
+    {.label = "Stop current job?", .font = u8g2_font_profont12_tr, .x = 10, .y = 15},
+};
+const int confirmStopUICount = sizeof(confirmStopUI) / sizeof(UiItem);
+
+UiPage confirmStopPage = {
+  "confirm stop",
+  confirmStopMenu,
+  confirmStopMenuCount,
+  confirmStopUI,
+  confirmStopUICount,
+  emptyDynUI,
+  0,
+  &runPage
+};
+
+
+
+// *****************************************************
+// settings Pages
+// *****************************************************
+
+
+MenuItem settingsMenu[] = {
+    {.label = "Back", .x = 10,  .y = 10, .action = actionCancel, .submenu = nullptr },
+    {.label = "calibrate joystick", .x = 10,  .y = 23, .action = actionReset, .submenu = nullptr },
+    {.label = "joystick invert X", .x = 10, .y = 36, .action = actionUnlock, .submenu = nullptr},
+    {.label = "joystick invert Y",  .x = 10, .y = 49, .action = actionHomingMenu,  .submenu = nullptr},
+    {.label = "set joystick speed",  .x = 10, .y = 62, .action = actionHomingMenu,  .submenu = nullptr},
+};
+const int settingsMenuCount = sizeof(settingsMenu) / sizeof(MenuItem);
+
+UiDynamicItem settingsDynamicUi[] = {
+    {"invertX",u8g2_font_4x6_tr, 90, 36, &settings.invertX, nullptr,0},
+    {"invertY",u8g2_font_4x6_tr, 90, 49, &settings.invertY, nullptr,0},
+  };
+const int settingsDynamicUiCount = sizeof(rootDynamicUi) / sizeof(UiDynamicItem);
+
+UiPage settingsPage = {
+  "settings",
+  settingsMenu,
+  settingsMenuCount,
+  emptyUI,
+  0,
+  settingsDynamicUi,
+  settingsDynamicUiCount,
+  &rootPage
+};
+
+
+
+
+
 
 // *****************************************************
 // currwent page pointer is what is going to be rendered

@@ -4,14 +4,20 @@
 #include <Button.h>
 #include "AiEsp32RotaryEncoder.h"
 #include "config.h"
+#include "settings.h"
 #include "encoder.h"
 #include "joystick.h"
 #include "parser.h"
 #include "gui_render.h"
 #include "gui_build.h"
 #include "gui_menu_actions.h"
+#include <Preferences.h>
 #include "ec11_encoder.h"
 #include "stream.h"
+
+Preferences prefs;
+// instace the settings struct
+Settings settings;
 
 // if true = in control via uart
 volatile bool active = false;
@@ -94,6 +100,9 @@ void initGrblStatus(){
 void setup() {
   // initial values of grblStatus
   initGrblStatus();
+  // peferences
+  prefs.begin("settings");
+  readSettings();
   // Serial
   // Serial usb for debugging
   Serial.begin(115200);
@@ -128,7 +137,7 @@ void setup() {
 
   // send real time command 0x8B to enable/disable uart command
 void toggleEnable(){
-  active = !active;
+  // active = !active;
   uint8_t byteToSend = 0x8B;
   Serial2.write(byteToSend);
   rtCmdTimer = millis();
