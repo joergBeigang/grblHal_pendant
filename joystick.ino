@@ -2,42 +2,51 @@
  * functions for jogging using a joystick
  * and the rotary encoder for the z axis at the same time
  *
- * 1. joystick calculation for xy based on gnea grbl wiki
- *  result is a feed rate and a distance
- *  feed is based on the joystick input
- * 2. we got a vector 2d in mm and a feed rate
- *  z axis in mm comes in play:
- *    calcuate the feed for only z motion
- *    feed of xy and feed of z move form a vector. 
- *    magnitude of this vector is the final feed rate
+ * 1. joystick calculation for xy based on the distacne.
+ *    the value is multiplied with the speed setting. 
+ * 2. the encoder is read for z axis movement
+ * 3. with the magnitude of the 3d vector the feed rate is calculated
+ * 
  */
 
-int joyXCenter = 1284;
-int joyYCenter = 1744;
 int lastPosJoystick = 0;
 int difPosJoystick = 0;
+
 void initJoystick() {
+  readSettings();
   resetQueue();
   lastPosJoystick = encoderPos;
   difPosJoystick = 0;
 }
 // main function to read the joystick and send jog commands
 void readJoystick(){
-  Serial.print("X  ");
-  Serial.println(calibrateRead(int(JOY_X_PIN)));
-  // Serial.print("y  ");
-  // Serial.println(calibrateRead(int(JOY_Y_PIN)));
   // prepareJoystickValue returns a normalized float
   // float value, float minVal, float maxVal, float centerZone, float center, float blend
-  float valueX = prepareJoystickValue(analogRead(JOY_X_PIN), .25, .31, .1,joyXCenter, .8);
-  float valueY = prepareJoystickValue(analogRead(JOY_Y_PIN), .35, .52, .15,joyYCenter, .8);
+  float valueX = prepareJoystickValue(analogRead(JOY_X_PIN),
+                                      settings.joystickXMin,
+                                      settings.joystickXMax,
+                                      .1,
+                                      settings.joystickXCenter, 
+                                      .8);
+  float valueY = prepareJoystickValue(analogRead(JOY_Y_PIN),
+                                      settings.joystickYMin,
+                                      settings.joystickYMax,
+                                      .15,
+                                      settings.joystickYCenter,
+                                      .8);
   // readJoystickEncoder returns a distance in mm
   float valueZ = readJoystickEncoder();
-
   // no input, do nothing.
   if (valueX == 0.0 && valueY == 0.0 && valueZ == 0.0){
     return;
   } 
+  // invert 
+  if (settings.joystickInvertX == true){
+    valueX = -valueX;
+  }
+  if (settings.joystickInvertY == true){
+    valueY = -valueY;
+  }
   timerEncoderRest = millis();
   // input, but grblhal isn't listening, switch uart on
   if (active == false){
@@ -96,15 +105,23 @@ float magnitude(const float *v, int n) {
  * centerZone, deadzone around center position
  * blend, amount of easing blend (between linear and squared - 0 - 1)
  */
-float prepareJoystickValue(float value, float minVal, float maxVal, float centerZone, float center, float blend){
-    float centerNormalized = float(center) / 4096;
-    value= (float(value) / 4096) - centerNormalized;
-    value = mapJoystickValue(value, minVal, maxVal, centerZone);
-    value = normalizeJoystickValue((value), centerZone, 1.0);
+float prepareJoystickValue(int ivalue, int minValRaw, int maxValRaw, float centerZone, int center, float blend){
+    float centerNormalized = float(center) / 4096.0;
+    float value = normalize(ivalue, minValRaw, center, maxValRaw);
+    value = mapJoystickValue(value, centerZone);
     value = ease_in_blend(value, blend);
     return value;
-
 }
+
+// normalize the raw (0 to 4096) joystick value based on center position
+float normalize(int val, int minVal, int centerVal, int maxVal) {
+    if (val < centerVal) {
+        return float(val - centerVal) / float(centerVal - minVal);
+    } else {
+        return float(val - centerVal) / float(maxVal - centerVal);
+    }
+}
+
 
 // normalize the joystick value in order to let it start from 0 even when 
 // the center bit is cut off
@@ -136,26 +153,24 @@ float ease_in_blend(float value, float amount){
     float nonlinear = value * value; // quadratic ease-in
     return ((1 - amount) * linear + amount * nonlinear) * neg;
 }
-
-// maps the joystick value to -1.0 to 1.0 range considering deadzone
-float mapJoystickValue(float value, float minVal, float maxVal, float centerZone){
-    int neg = 1;
-    float factor = 1.0 / maxVal;
-    if (value < 0) {
-      neg = -1;
-      factor = 1.0 / minVal;
-    }
-
-    float result = fabs(value) * factor;
-    if (result < centerZone) {
+// value: normalized [-1, 1]
+// centerZone: deadzone fraction, e.g., 0.1
+float mapJoystickValue(float value, float centerZone) {
+    // deadzone
+    if (fabs(value) < centerZone) {
         return 0.0f;
     }
-    return (result * neg);
-    }
+
+    // scale remaining range so 0..centerZone..1 maps linearly to 0..1
+    float sign = (value > 0) ? 1.0f : -1.0f;
+    float scaled = (fabs(value) - centerZone) / (1.0f - centerZone);
+
+    return scaled * sign;
+}
 
 // builds the jog command for grblHAL
 String jog_build_cmd(float x, float y, float z){
-  float distMultiplier = 3; //speed of joystick jogging 
+  float distMultiplier = settings.joystickSpeed;
   x = x * distMultiplier;
   y = y * distMultiplier;
   float vec[3] = {x,y,z};
@@ -204,12 +219,73 @@ float calculateDistance(float value, float feed){
     return distance;
 }
 
+// ******************************
+// joystick calibration functions
+// ******************************
 
-int calibrateRead(int pin) {
-  unsigned int readX;
-  for (int i = 0; i < 100; i++) {
-    readX += analogRead(pin);
+// joyCalib holds the temporary calibration values
+JoystickCalibtration joystickCalib = {
+  .xAxisCenter = 2048,
+  .yAxisCenter = 2048,
+  .xAxisMax = 4095,
+  .yAxisMax = 4095,
+  .xAxisMin = 0,
+  .yAxisMin = 0,
+};
+
+void joyCalibrateCenter() {
+  joystickCalib.xAxisCenter = joyCalibrateRead(int(JOY_X_PIN));
+  joystickCalib.yAxisCenter = joyCalibrateRead(int(JOY_Y_PIN));
+}
+
+void joyCalibrateUp() {
+  joystickCalib.yAxisMax = joyCalibrateRead(int(JOY_Y_PIN));
+  Serial.println(joystickCalib.yAxisMax);
+}
+
+void joyCalibrateDown() {
+  joystickCalib.yAxisMin = joyCalibrateRead(int(JOY_Y_PIN));
+  Serial.println(joystickCalib.yAxisMin);
+}
+
+void joyCalibrateLeft() {
+  joystickCalib.xAxisMin = joyCalibrateRead(int(JOY_X_PIN));
+  Serial.println(joystickCalib.xAxisMin);
+}
+
+void joyCalibrateRight() {
+  joystickCalib.xAxisMax = joyCalibrateRead(int(JOY_X_PIN));
+  Serial.println(joystickCalib.xAxisMax);
+  calibrateJoystick();
+}
+
+
+int joyCalibrateRead(int pin) {
+  uint32_t r = 0;
+  for (int i = 0; i < 50; i++) {
+    r += analogRead(pin);
   }
-  return int(float(readX) / 100.0);
+  return int(float(r) / 50.0);
+}
+
+void calibrateJoystick() {
+  // center
+  prefs.putInt("joyXCenter", joystickCalib.xAxisCenter);
+  prefs.putInt("joyYCenter", joystickCalib.yAxisCenter);
+  // we're not sure how the joystick is wired so up is not necessarily max
+  if (joystickCalib.xAxisMax > joystickCalib.xAxisMin){
+    prefs.putInt("joyXMax", joystickCalib.xAxisMax);
+    prefs.putInt("joyXMin", joystickCalib.xAxisMin);
+  } else {
+    prefs.putInt("joyXMax", joystickCalib.xAxisMin);
+    prefs.putInt("joyXMin", joystickCalib.xAxisMax);
+  }
+  if (joystickCalib.yAxisMax > joystickCalib.yAxisMin){
+    prefs.putInt("joyYMax", joystickCalib.yAxisMax);
+    prefs.putInt("joyYMin", joystickCalib.yAxisMin);
+  } else {
+    prefs.putInt("joyYMax", joystickCalib.yAxisMin);
+    prefs.putInt("joyYMin", joystickCalib.yAxisMax);
+  }
 }
 

@@ -4,15 +4,18 @@
 
 
 struct Settings {
-  float joystickXCenter;
-  float joystickYCenter;
-  float joystickXMax;
-  float joystickYMax;
-  float joystickXMin;
-  float joystickYMin;
+  int joystickXCenter;
+  int joystickYCenter;
+  int joystickXMax;
+  int joystickYMax;
+  int joystickXMin;
+  int joystickYMin;
+  int joystickInvertX;
+  int joystickInvertY;
   float joystickSpeed;
-  float invertX;
-  float invertY;
 };
 
+void readSettings();
+void checkJoystickSettings();
+bool verifySettings();
 #endif

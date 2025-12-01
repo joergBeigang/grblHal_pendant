@@ -21,10 +21,10 @@ UiDynamicItem emptyDynUI[1] = {};
 
 MenuItem rootMenu[] = {
     {.label = "Menu", .x = 3, .y = 60, .action = actionMenu, .submenu = nullptr},
-    {.label = "OFF",  .x = 30, .y = 60, .action = actionOff,  .submenu = nullptr},
+    {.label = "OFF",  .x = 33, .y = 60, .action = actionOff,  .submenu = nullptr},
     {.label = "X",    .x = 55, .y = 60, .action = actionX,    .submenu = nullptr},
     {.label = "Y",    .x = 70, .y = 60, .action = actionY,    .submenu = nullptr},
-    {.label = "Joystick",  .x = 80,.y = 60, .action = actionJoy,  .submenu = nullptr},
+    {.label = "Joystick",  .x = 83,.y = 60, .action = actionJoy,  .submenu = nullptr},
     {.label = "123.123", .x = 1,  .y = 13, .action = actionXPos, .submenu = nullptr, .value = &grblStatus.position[0]},
     {.label = "123.123", .x = 43, .y = 13, .action = actionYPos, .submenu = nullptr, .value = &grblStatus.position[1]},
     {.label = "123.123", .x = 83, .y = 13, .action = actionZPos, .submenu = nullptr, .value = &grblStatus.position[2]},
@@ -32,22 +32,17 @@ MenuItem rootMenu[] = {
 const int rootMenuCount = sizeof(rootMenu) / sizeof(MenuItem);
 
 UiItem rootUi[] = {
-    // {.label = "X:", .font = u8g2_font_profont12_tr, .x = 0, .y = 13},
-    // {.label = "Y:", .font = u8g2_font_profont12_tr, .x = 40, .y = 13},
-    // {.label = "Z:", .font = u8g2_font_profont12_tr, .x = 80, .y = 13},
-    {.label = "Feed:", .font = u8g2_font_4x6_tr, .x = 0, .y = 43},
-    {.label = "Spindle:", .font = u8g2_font_4x6_tr, .x = 35, .y = 43},
-    {.label = "Rapid:", .font = u8g2_font_4x6_tr, .x = 80, .y = 43},
+    {.label = "Feed:", .font = u8g2_font_4x6_tr, .x = 3, .y = 43},
+    {.label = "Spindle:", .font = u8g2_font_4x6_tr, .x = 70, .y = 43},
     {.label = "State:", .font = u8g2_font_4x6_tr, .x = 28, .y = 30},
   };
 const int rootUiCount = sizeof(rootUi) / sizeof(UiItem);
 
 UiDynamicItem rootDynamicUi[] = {
-    {"Feed:", u8g2_font_4x6_tr, 20, 43, &grblStatus.overRides[0], nullptr,0},
-    {"Spindle:", u8g2_font_4x6_tr, 70, 43, &grblStatus.overRides[1], nullptr,0},
-    {"Rapid:",u8g2_font_4x6_tr, 110, 43, &grblStatus.overRides[2], nullptr,0},
+    {"Feed:", u8g2_font_profont10_tf, 30, 43, &grblStatus.overRides[0], nullptr,0},
+    {"Spindle:", u8g2_font_profont10_tf, 110, 43, &grblStatus.overRides[2], nullptr,0},
     {"State:",u8g2_font_profont12_tr  , 56, 30, nullptr, &grblStatus.status},
-    {"active:",u8g2_font_profont12_tr  , 86, 30, &grblStatus.uartMode, nullptr },
+    // {"active:",u8g2_font_4x6_tr, 86, 30, &grblStatus.uartMode, nullptr },
 
   };
 
@@ -165,7 +160,7 @@ MenuItem menuMenu[] = {
     {.label = "Reset", .x = 10,  .y = 23, .action = actionReset, .submenu = nullptr },
     {.label = "Unlock", .x = 10, .y = 36, .action = actionUnlock, .submenu = nullptr},
     {.label = "Homing",  .x = 10, .y = 49, .action = actionHomingMenu,  .submenu = nullptr},
-    {.label = "Settings",  .x = 10, .y = 62, .action = actionHomingMenu,  .submenu = nullptr},
+    {.label = "Settings",  .x = 10, .y = 62, .action = actionEnterSettings,  .submenu = nullptr},
 };
 const int menuMenuCount = sizeof(menuMenu) / sizeof(MenuItem);
 
@@ -215,7 +210,6 @@ UiPage confirmHomingPage = {
 MenuItem runMenu[] = {
     {.label = "Pause", .x = 3, .y = 60, .action = actionPause, .submenu = nullptr},
     {.label = "Resume",  .x = 30, .y = 60, .action = actionResume,  .submenu = nullptr},
-    {.label = "Stop",  .x = 60, .y = 60, .action = actionStopMenu,  .submenu = nullptr},
 };
 
 const int runMenuCount = sizeof(runMenu) / sizeof(MenuItem);
@@ -280,18 +274,13 @@ UiPage confirmStopPage = {
 
 MenuItem settingsMenu[] = {
     {.label = "Back", .x = 10,  .y = 10, .action = actionCancel, .submenu = nullptr },
-    {.label = "calibrate joystick", .x = 10,  .y = 23, .action = actionReset, .submenu = nullptr },
-    {.label = "joystick invert X", .x = 10, .y = 36, .action = actionUnlock, .submenu = nullptr},
-    {.label = "joystick invert Y",  .x = 10, .y = 49, .action = actionHomingMenu,  .submenu = nullptr},
-    {.label = "set joystick speed",  .x = 10, .y = 62, .action = actionHomingMenu,  .submenu = nullptr},
+    {.label = "calibrate joystick", .x = 10,  .y = 23, .action = actionEnterCalibrate, .submenu = nullptr },
+    {.label = "joystick invert X", .x = 10, .y = 36, .action = actionInvertX, .submenu = nullptr},
+    {.label = "joystick invert Y",  .x = 10, .y = 49, .action = actionInvertY,  .submenu = nullptr},
+    {.label = "set joystick speed",  .x = 10, .y = 62, .action = actionEnterJoystickSpeed,  .submenu = nullptr},
 };
 const int settingsMenuCount = sizeof(settingsMenu) / sizeof(MenuItem);
 
-UiDynamicItem settingsDynamicUi[] = {
-    {"invertX",u8g2_font_4x6_tr, 90, 36, &settings.invertX, nullptr,0},
-    {"invertY",u8g2_font_4x6_tr, 90, 49, &settings.invertY, nullptr,0},
-  };
-const int settingsDynamicUiCount = sizeof(rootDynamicUi) / sizeof(UiDynamicItem);
 
 UiPage settingsPage = {
   "settings",
@@ -299,18 +288,191 @@ UiPage settingsPage = {
   settingsMenuCount,
   emptyUI,
   0,
-  settingsDynamicUi,
-  settingsDynamicUiCount,
-  &rootPage
+  emptyDynUI,
+  0,
+  &menuPage
 };
 
 
+// *****************************************************
+// calibrate joystick pages
+// *****************************************************
+
+// center joystick
+MenuItem joystickCenterMenu[] = {
+    {.label = "OK", .x = 50,  .y = 50, .action = actionCalibrateCenter, .submenu = nullptr },
+};
+const int joystickCenterMenuCount= sizeof(joystickCenterMenu) / sizeof(MenuItem);
+
+UiItem joystickCenterUi[] = {
+    {.label = "Center joystick and click ok", .font = u8g2_font_4x6_tr, .x = 5, .y = 15},
+  };
+const int joystickCenterUiCount = sizeof(joystickCenterUi) / sizeof(UiItem);
 
 
+UiPage joystickCenterPage = {
+  "center",
+  joystickCenterMenu,
+  joystickCenterMenuCount,
+  joystickCenterUi,
+  joystickCenterUiCount,
+  emptyDynUI,
+  0,
+  &settingsPage
+};
+
+
+// joystick up
+MenuItem joystickUpMenu[] = {
+    {.label = "OK", .x = 50,  .y = 50, .action = actionCalibrateUp, .submenu = nullptr },
+};
+const int joystickUpMenuCount= sizeof(joystickCenterMenu) / sizeof(MenuItem);
+
+UiItem joystickUpUi[] = {
+    {.label = "Hold joystick up and click ok", .font = u8g2_font_4x6_tr, .x = 5, .y = 15},
+  };
+const int joystickUpUiCount = sizeof(joystickUpUi) / sizeof(UiItem);
+
+
+UiPage joystickUpPage = {
+  "up",
+  joystickUpMenu,
+  joystickUpMenuCount,
+  joystickUpUi,
+  joystickUpUiCount,
+  emptyDynUI,
+  0,
+  &settingsPage
+};
+
+
+// joystick down
+MenuItem joystickDownMenu[] = {
+    {.label = "OK", .x = 50,  .y = 50, .action = actionCalibrateDown, .submenu = nullptr },
+};
+const int joystickDownMenuCount= sizeof(joystickCenterMenu) / sizeof(MenuItem);
+
+UiItem joystickDownUi[] = {
+    {.label = "Hold joystick down click ok", .font = u8g2_font_4x6_tr, .x = 5, .y = 15},
+  };
+const int joystickDownUiCount = sizeof(joystickDownUi) / sizeof(UiItem);
+
+
+UiPage joystickDownPage = {
+  "down",
+  joystickDownMenu,
+  joystickDownMenuCount,
+  joystickDownUi,
+  joystickDownUiCount,
+  emptyDynUI,
+  0,
+  &settingsPage
+};
+
+
+// joystick left
+MenuItem joystickLeftMenu[] = {
+    {.label = "OK", .x = 50,  .y = 50, .action = actionCalibrateLeft, .submenu = nullptr },
+};
+const int joystickLeftMenuCount= sizeof(joystickLeftMenu) / sizeof(MenuItem);
+
+UiItem joystickLeftUi[] = {
+    {.label = "Hold joystick left click ok", .font = u8g2_font_4x6_tr, .x = 5, .y = 15},
+  };
+const int joystickLeftUiCount = sizeof(joystickLeftUi) / sizeof(UiItem);
+
+
+UiPage joystickLeftPage = {
+  "left",
+  joystickLeftMenu,
+  joystickLeftMenuCount,
+  joystickLeftUi,
+  joystickLeftUiCount,
+  emptyDynUI,
+  0,
+  &settingsPage
+};
+
+// joystick right
+MenuItem joystickRightMenu[] = {
+    {.label = "OK", .x = 50,  .y = 50, .action = actionCalibrateRight, .submenu = nullptr },
+};
+const int joystickRightMenuCount= sizeof(joystickRightMenu) / sizeof(MenuItem);
+
+UiItem joystickRightUi[] = {
+    {.label = "Hold joystick right click ok", .font = u8g2_font_4x6_tr, .x = 5, .y = 15},
+  };
+const int joystickRightUiCount = sizeof(joystickRightUi) / sizeof(UiItem);
+
+
+UiPage joystickRightPage = {
+  "right",
+  joystickRightMenu,
+  joystickRightMenuCount,
+  joystickRightUi,
+  joystickRightUiCount,
+  emptyDynUI,
+  0,
+  &settingsPage
+};
+
+// *****************************************************
+// calibrate joystick pages on startup
+// *****************************************************
+//
+MenuItem joystickStartupMenu[] = {
+    {.label = "OK", .x = 50,  .y = 50, .action = actionCalibrateUp, .submenu = nullptr },
+};
+const int joystickStartupMenuCount= sizeof(joystickStartupMenu) / sizeof(MenuItem);
+
+UiItem joystickStartupUi[] = {
+    {.label = "Joystick needs to be calibrated", .font = u8g2_font_4x6_tr, .x = 5, .y = 15},
+  };
+const int joystickStartupUiCount = sizeof(joystickStartupUi) / sizeof(UiItem);
+
+
+UiPage joystickStartupPage = {
+  "right",
+  joystickStartupMenu,
+  joystickStartupMenuCount,
+  joystickStartupUi,
+  joystickStartupUiCount,
+  emptyDynUI,
+  0,
+  &settingsPage
+};
 
 
 // *****************************************************
-// currwent page pointer is what is going to be rendered
+// set joystick speed page
+// *****************************************************
+
+MenuItem setJoystickSpeedMenu[] = {
+    {.label = "123.123", .x = 40,  .y = 33, .action = actionSetValue, .submenu = nullptr, .value = pValueEdit},
+    // {.label = "0.0", .x = 40, .y = 30, .action = actionSetValue, .submenu = nullptr},
+    {.label = "Cancel", .x = 3, .y = 60, .action = actionCancel, .submenu = nullptr},
+    {.label = "Set",  .x = 50, .y = 60, .action = actionSetJoystickSpeed,  .submenu = nullptr},
+};
+const int setJoystickSpeedMenuCount = sizeof(setJoystickSpeedMenu) / sizeof(MenuItem);
+
+UiItem setJoystickSpeedUI[] = {
+    {.label = "Set joystick speed", .font = u8g2_font_profont12_tr, .x = 30, .y = 15},
+};
+const int setJoystickSpeedUICount = sizeof(setJoystickSpeedUI) / sizeof(UiItem);
+
+UiPage setJoystickSpeedPage = {
+  "Set Speed",
+  setJoystickSpeedMenu,
+  setJoystickSpeedMenuCount,
+  setJoystickSpeedUI,
+  setJoystickSpeedUICount,
+  emptyDynUI,
+  0,
+  &rootPage
+};
+
+// *****************************************************
+// current page pointer is what is going to be rendered
 // *****************************************************
 UiPage* currentPage = &rootPage;
 // UiPage* currentPage = &setAxisPage;

@@ -27,7 +27,7 @@ volatile bool keepActive = false;
 
 // timer for real time command, used for swtiching on in 
 // joystick and encoder reading to avoid too fast switching
-// and grblHal freezing
+// and grblHal freezinguG
 long rtCmdTimer = 0;
 
 // timer for swtiching off UART Mode. 
@@ -133,6 +133,8 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(ENCODER_A), encoderISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(ENCODER_B), encoderISR, CHANGE);
   drawScreen(0);
+  // check if there are valid joystick settings set
+  checkJoystickSettings();
 }
 
   // send real time command 0x8B to enable/disable uart command
@@ -189,26 +191,24 @@ void modeLogic(){
 // setting the mode based on the machine status
 // run everytime the parser found a grbl status report
 void setMode(){
-  int previousMode = mode;
-  if (grblStatus.status == String("run")){
-    // machine is runnig some gcode. we can change the screen here to have 
-    // a pause button
+  static int previousMode = mode;
+  int chk1 = grblStatus.status.indexOf("RUN"); 
+  int chk2 = grblStatus.status.indexOf("HOLD"); 
+  if (chk1 != -1 || chk2 != -1) {
     mode = 5;
+    previousMode = 5;
+    currentPage = &runPage;
     return;
-  }
-  if (grblStatus.status == String("idle") && previousMode == 5){
-    // swtich the page back to root page
-    currentPage = &rootPage;
-    mode = 0; //jogging off
-    return;
-  }
-  if (grblStatus.status == String("jog")){
-    return;
+  } else {
+    if (previousMode == 5){
+      currentPage = &rootPage;
+      // machine just stopped running, go back to previous mode
+      mode = 0;
+      previousMode = 0;
+      return;
+    }
   }
 
-  // some other state like alarm, door open etc. 
-  // jogging is switched off
-  // mode = 0;
 }
 
 
@@ -220,20 +220,7 @@ void readUart(){
     grblInfo += c;
 
     if (c == '\n') {
-        // Serial.print("LINE: ");
-        // Serial.println(grblInfo);
-        // check for ok
-        // if (grblInfo.indexOf("ok") != -1) {
-        //   ok = true;
-        // }
-
-        // bool chk = parseGrblStatusReport(grblInfo);
-        // if (chk == true){
-          // set operation mode based on grbl status
-          setMode();
-          // redraw the screen with the updated info
-          // drawScreen(cursorPosition);  // redraw cursor
-        // } 
+        setMode();
         bool chk = parseGrblOutput(grblInfo);
         grblInfo = "";    // reset after full line is received
     }

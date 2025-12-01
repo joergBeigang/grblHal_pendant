@@ -91,7 +91,7 @@ void rotarySpindleLoop(){
     rotatrySpindleLastPos= movement;
     spindleOv.difference += dif;
   }
-  // sendOverrideCommands(spindleOv);
+  sendOverrideCommands(spindleOv);
 }
 
 

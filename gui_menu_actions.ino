@@ -40,6 +40,7 @@ void actionSetValue(){
   }
 }
 
+
 void actionCancel(){
   Serial.println("cancel");
   Serial.printf("currentPage=%p, parent=%p\n", currentPage, currentPage->parent);
@@ -54,9 +55,8 @@ void actionCancel(){
 
 
 
-
 // *****************************************************
-// actions for main menu items
+// actions for root menu items
 // *****************************************************
 void actionOff(){
   mode = 0;
@@ -170,6 +170,9 @@ void actionSetAxisZ(){
   keepActive = false;
 }
 
+// *****************************************************
+// actions for the main menu
+// *****************************************************
 
 void actionHomingMenu() {
   currentPage = &confirmHomingPage;
@@ -206,7 +209,13 @@ void actionUnlock() {
   selectedIndex = 1;
   keepActive = false;
   mode = 0;
+}
 
+void actionEnterSettings(){
+  currentPage = &settingsPage;
+  cursorPosition = 0;
+  mode = 0;
+  selectedIndex = -1;
 }
 
 
@@ -220,7 +229,7 @@ void actionPause(){
 }
 
 void actionResume(){
-  if (mode == 5) return;
+  // if (mode == 5) return;
   uint8_t cycleStart = 0x81;
   Serial2.write(cycleStart);
   mode = 5;
@@ -243,3 +252,76 @@ void actionStop(){
   currentPage = &rootPage;
 }
 
+// *****************************************************
+// actions for joystick calibration
+// *****************************************************
+void actionEnterCalibrate(){
+  currentPage = &joystickCenterPage;
+  mode = 0;
+  cursorPosition = 0;
+  selectedIndex = 1;
+}
+void actionCalibrateCenter(){
+  joyCalibrateCenter();
+  currentPage = &joystickUpPage;
+  mode = 0;
+  selectedIndex = -1;
+}
+
+void actionCalibrateUp() {
+  joyCalibrateUp();
+  currentPage = &joystickDownPage;
+  mode = 0;
+  selectedIndex = -1;
+}
+
+void actionCalibrateDown() {
+  joyCalibrateDown();
+  currentPage = &joystickLeftPage;
+  mode = 0;
+  selectedIndex = -1;
+}
+void actionCalibrateLeft() {
+  joyCalibrateLeft();
+  currentPage = &joystickRightPage;
+  mode = 0;
+  selectedIndex = -1;
+}
+void actionCalibrateRight() {
+  joyCalibrateRight();
+  currentPage = &rootPage;
+  mode = 0;
+  selectedIndex = -1;
+}
+
+void actionInvertX(){
+  prefs.putBool("joyInvX", !settings.joystickInvertX);
+  readSettings();
+  currentPage = &rootPage;
+}
+
+void actionInvertY(){
+  prefs.putBool("joyInvY", !settings.joystickInvertY);
+  readSettings();
+  currentPage = &rootPage;
+}
+
+void actionEnterJoystickSpeed(){
+  currentPage = &setJoystickSpeedPage;
+  cursorPosition = 0;
+  mode = 0;
+  selectedIndex = -1;
+  valueEdit = settings.joystickSpeed;
+}
+
+void actionSetJoystickSpeed(){
+  if (valueEdit < 0.1) {
+    valueEdit = 0.1;
+  }
+  prefs.putFloat("joySpeed", valueEdit);
+  readSettings();
+  currentPage = &settingsPage;
+  cursorPosition = 0;
+  mode = 0;
+  selectedIndex = -1;
+}

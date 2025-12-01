@@ -5,5 +5,6 @@
 void processQueue();
 void sendToGrbl(const String &cmd);
 void sendSingleCommand(String cmd);
+void resetQueue();
 
 #endif
