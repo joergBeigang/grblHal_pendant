@@ -34,11 +34,11 @@ between the computer and pendant without pressing any buttons.
 
 The code is using the arduino framework, and a few libraries:
 
-U8g2lib.h and Wire.h - for the display
-Button.h and AiEsp32RotaryEncoder.h - for the buttons of the EC11 encoders
-Preferences.h - for saving settings in the esp32
-queue - for streaming gcode
-math.h
+- U8g2lib.h and Wire.h - for the display
+- Button.h and AiEsp32RotaryEncoder.h - for the buttons of the EC11 encoders
+- Preferences.h - for saving settings in the esp32
+- queue - for streaming gcode
+- math.h
 
 It can be compiled and uploaded with the ardiuno ide or the arduino cli tools.
 
