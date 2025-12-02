@@ -55,6 +55,7 @@ joystick input is selected.
 
 ## Hardware 
 
+
 In the hardware folder is a schematic, and CAD files of the case. I am using
 3mm alu dipond as front panel (again, because I found some in my garage). 3mm is
 a pretty unusual thickness for front panels, so most likely the model need to be
