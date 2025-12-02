@@ -110,9 +110,23 @@ float prepareJoystickValue(int ivalue, int minValRaw, int maxValRaw, float cente
     float value = normalize(ivalue, minValRaw, center, maxValRaw);
     value = mapJoystickValue(value, centerZone);
     value = ease_in_blend(value, blend);
+    Serial.print("min: ");
+    Serial.print(minValRaw);
+    Serial.print("max ");
+    Serial.print(maxValRaw);
+    Serial.print("center ");
+    Serial.print(center);
+    Serial.print("final ");
+    Serial.println(value);
+    value = clampValue(value);
     return value;
 }
 
+float clampValue(float value) {
+  if (value < -1) value = -1;
+  if (value > 1) value = 1;
+  return value;
+}
 // normalize the raw (0 to 4096) joystick value based on center position
 float normalize(int val, int minVal, int centerVal, int maxVal) {
     if (val < centerVal) {
@@ -262,10 +276,25 @@ void joyCalibrateRight() {
 
 int joyCalibrateRead(int pin) {
   uint32_t r = 0;
+  int count = 0;
   for (int i = 0; i < 50; i++) {
-    r += analogRead(pin);
+    // r += analogRead(pin);
+    int temp = analogRead(pin);
+
+    // illegal high value detection
+    if (temp > 4095) continue;
+    // spike detection
+    if (count > 0){
+      int av= r/(count);
+      if (abs(temp - av) > 10) continue;
+    }
+    r += temp;
+    count ++;
+    Serial.println(temp);
   }
-  return int(float(r) / 50.0);
+  Serial.print("final:");
+  Serial.println(float(r)/count);
+  return int(float(r) / count);
 }
 
 void calibrateJoystick() {

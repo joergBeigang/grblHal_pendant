@@ -1,6 +1,6 @@
 
 # Arduino/ESP32 build output
-/build/
+/grblHal_pendant/build/
 /*.elf
 /*.bin
 /*.hex
