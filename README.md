@@ -53,8 +53,7 @@ The analog joystick needs to be calibrated first, this can be done in the menu o
 This is very important, otherwise the machine might move unexpectedly as soon as
 joystick input is selected.
 
-## Hardware 
-
+## Hardware
 
 In the hardware folder is a schematic, and CAD files of the case. I am using
 3mm alu dipond as front panel (again, because I found some in my garage). 3mm is
