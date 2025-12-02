@@ -32,6 +32,8 @@ smooth.
 The UART mode of grblHal is enabled, and disabled automatically. So you can switch
 between the computer and pendant without pressing any buttons.
 
+
+Building:
 The code is using the arduino framework, and a few libraries:
 
 - U8g2lib.h and Wire.h - for the display
