@@ -43,8 +43,8 @@ The code is using the arduino framework, and a few libraries:
 It can be compiled and uploaded with the ardiuno ide or the arduino cli tools.
 
 The pin assignments and the definition of the pulses per revolution of the
-reotayry encoder are in the config.h file.
-The analog joystick needs to be calibrated first, this can be done in the menu.
+rotary encoder can be found in the config.h file.
+The analog joystick needs to be calibrated first, this can be done in the menu of the pendant.
 This is very important, otherwise the machine might move unexpectedly as soon as
 joystick input is selected.
 
