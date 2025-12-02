@@ -1,7 +1,7 @@
-grblHal_pendant
+# grblHal_pendant
 
 This is a pendant for grblHal controlled cnc machines.
-It is running on a ESP32. For the analog feel it is using a high resolution
+It is running on an ESP32. For the analog feel it is using a high resolution
 rotatary encoder (with 1200 pulses per revolution), and an analog joystick for
 rapid movement.
 There are in total 3 EC11 rotary encoders with button functionality. Two to dial
@@ -32,20 +32,21 @@ smooth.
 The UART mode of grblHal is enabled, and disabled automatically. So you can switch
 between the computer and pendant without pressing any buttons.
 
+---
 
-Building:
+## Building
 The code is using the arduino framework, and a few libraries:
 
-- U8g2lib.h and Wire.h - for the display
-- Button.h and AiEsp32RotaryEncoder.h - for the buttons of the EC11 encoders
-- Preferences.h - for saving settings in the esp32
-- queue - for streaming gcode
-- math.h
+- **U8g2lib.h** and **Wire.h** – for the display
+- **Button.h** and **AiEsp32RotaryEncoder.h** – for the buttons of the EC11 encoders
+- **Preferences.h** – for saving settings in the esp32
+- **queue** – for streaming gcode
+- **math.h**
 
 It can be compiled and uploaded with the ardiuno ide or the arduino cli tools.
 
 The pin assignments and the definition of the pulses per revolution of the
-rotary encoder can be found in the config.h file.
+rotary encoder can be found in the `config.h` file.
 The analog joystick needs to be calibrated first, this can be done in the menu of the pendant.
 This is very important, otherwise the machine might move unexpectedly as soon as
 joystick input is selected.
@@ -55,5 +56,8 @@ In the hardware folder is a schematic, and CAD files of the case. I am using
 a pretty unusual thickness for front panels, so most likely the model need to be
 adapted a little, or just 3d print a spacer that goes under the panel.
 
+---
+
+## Disclaimer
 Use on your own risk, read the source code first, don't crash the machine or
 even hurt yourself.
