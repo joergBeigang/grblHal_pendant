@@ -267,34 +267,45 @@ void joyCalibrateLeft() {
   // Serial.println(joystickCalib.xAxisMin);
 }
 
-void joyCalibrateRight() {
+bool joyCalibrateRight() {
   joystickCalib.xAxisMax = joyCalibrateRead(int(JOY_X_PIN));
   // Serial.println(joystickCalib.xAxisMax);
   calibrateJoystick();
+  return sanityCheck();
 }
 
 
 int joyCalibrateRead(int pin) {
-  uint32_t r = 0;
-  int count = 0;
-  for (int i = 0; i < 50; i++) {
-    // r += analogRead(pin);
-    int temp = analogRead(pin);
+    const int N = 50;
+    int readings[N];
 
-    // illegal high value detection
-    if (temp > 4095) continue;
-    // spike detection
-    if (count > 0){
-      int av= r/(count);
-      if (abs(temp - av) > 10) continue;
+    // get samples
+    for (int i = 0; i < N; i++) {
+        readings[i] = analogRead(pin);
+        delay(2); // let joystick settle
     }
-    r += temp;
-    count ++;
-    Serial.println(temp);
-  }
-  Serial.print("final:");
-  Serial.println(float(r)/count);
-  return int(float(r) / count);
+
+    // get median
+    int sorted[N];
+    memcpy(sorted, readings, sizeof(readings));
+    std::sort(sorted, sorted + N);
+    int median = sorted[N/2];
+
+    // finally get rid of spikes
+    uint32_t r = 0;
+    int count = 0;
+    for (int i = 0; i < N; i++) {
+        if (abs(readings[i] - median) <= 10) { 
+            r += readings[i];
+            count++;
+        }
+    }
+
+    if (count == 0) return median; // fallback
+
+    Serial.print("value ");
+    Serial.println(int(float(r)/count));
+    return int(float(r) / count);
 }
 
 void calibrateJoystick() {
@@ -316,5 +327,22 @@ void calibrateJoystick() {
     prefs.putInt("joyYMax", joystickCalib.yAxisMin);
     prefs.putInt("joyYMin", joystickCalib.yAxisMax);
   }
+}
+
+// check if the result of the joystick calibration is valid
+bool sanityCheck() {
+  // DELTA is the minimum difference between min, center and max
+  const int DELTA = 600;
+  readSettings();
+  Serial.println("check1");
+  if (settings.joystickXMax - settings.joystickXCenter < DELTA) return false;
+  Serial.println("check2");
+  if (settings.joystickXCenter - settings.joystickXMin < DELTA) return false;
+  Serial.println("check3");
+  if (settings.joystickYMax - settings.joystickYCenter < DELTA) return false;
+  Serial.println("check4");
+  if (settings.joystickYCenter - settings.joystickYMin < DELTA) return false;
+  Serial.println("check passed");
+  return true;
 }
 

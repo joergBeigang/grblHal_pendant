@@ -19,7 +19,7 @@ void joyCalibrateCenter();
 void joyCalibrateUp();
 void joyCalibrateDown();
 void joyCalibrateLeft();
-void joyCalibrateRight();
+bool joyCalibrateRight();
 float prepareJoystickValue(int value, float minVal, float maxVal, float centerZone, float center, float blend);
 float readJoystickEncoder();
 String jog_build_cmd(float x, float y, float z);

@@ -288,10 +288,14 @@ void actionCalibrateLeft() {
   selectedIndex = -1;
 }
 void actionCalibrateRight() {
-  joyCalibrateRight();
-  currentPage = &rootPage;
-  mode = 0;
-  selectedIndex = -1;
+  if (joyCalibrateRight() == true) {
+    currentPage = &rootPage;
+    mode = 0;
+    selectedIndex = -1;
+  } else {
+    // sanity check failed, we gotta do it again
+    actionEnterCalibrate();
+  }
 }
 
 void actionInvertX(){
