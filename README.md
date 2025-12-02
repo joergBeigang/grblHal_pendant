@@ -53,11 +53,13 @@ The analog joystick needs to be calibrated first, this can be done in the menu o
 This is very important, otherwise the machine might move unexpectedly as soon as
 joystick input is selected.
 
+## Hardware 
+
 In the hardware folder is a schematic, and CAD files of the case. I am using
 3mm alu dipond as front panel (again, because I found some in my garage). 3mm is
 a pretty unusual thickness for front panels, so most likely the model need to be
 adapted a little, or just 3d print a spacer that goes under the panel.
-
+And yes, the case is quite big, that's because I'm not a big fan of handheld devices. I prefer it mounted to the CNC so I one hand free to slide a parallel around on the work piece or similar.
 ---
 
 ## Disclaimer
