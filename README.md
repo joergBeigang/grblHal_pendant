@@ -9,14 +9,14 @@ in the feed and spindle overrides, and one for navigating the menu.
 The display is a I2C OLED with 128x64 pixel resolution.
 I chose those components mostly because I already had them laying around, the
 rotatary encoder came out of an old pendant I made for 8bit grbl, the joystick
-out of an old rc controll.
+out of an old rc controller.
 EC11 and the oled display can be ordered dirt cheap from China.
 
 I am aware that my choice for the encoder for jogging is a little bit
 unconventional, and therefore building a pandent like this is not for everyone,
 but at least some code snippets might be useful for others.
 
-All the jogging regardless if joystick or encoder is done by reading the input
+All the jogging, regardless if joystick or encoder is done by reading the input
 device in a frequency of 10Hz. I figured that is a good frequency to feed
 jogging commands to grbl or grblHal. The revolution of the roatary encoder is
 translated directly into the revolution of my ball screw, so one revolution
@@ -25,10 +25,11 @@ moves the machine be 5mm. 1200 pulses per revolution means that one pulse equals
 easy to calculate and it has the nice side effect that there is no need for any
 stop jog real time commands.
 This gives a pretty secure feeling when jogging.
-I personally often like to touch of with a running spindle, for example when
-preparing stock with a indexed end mill. And like this, this feels really
+I personally often like to touch off with a running spindle, when
+preparing stock with a indexed end mill for example. And like this, this feels really
 smooth.
-UART mode of grblHal is enabled, and disabled automatically. So you can switch
+
+The UART mode of grblHal is enabled, and disabled automatically. So you can switch
 between the computer and pendant without pressing any buttons.
 
 The code is using the arduino framework, and a few libraries:
