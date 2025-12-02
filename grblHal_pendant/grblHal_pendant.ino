@@ -49,7 +49,6 @@ bool ok = true;
 // 5 - machine is in run state
 int mode = 0;                   
 
-
 // the value that is edited in the menu via menu encoder
 float valueEdit = 0.0;  
 
@@ -143,8 +142,8 @@ void toggleEnable(){
   uint8_t byteToSend = 0x8B;
   Serial2.write(byteToSend);
   rtCmdTimer = millis();
-  Serial.println("ENABLE/DISABLE");
-  Serial.println(active);
+  // Serial.println("ENABLE/DISABLE");
+  // Serial.println(active);
 
   if (active == true) {
     timerEncoderRest = millis();
@@ -161,7 +160,7 @@ void disableTimer(){
       if (active == 1){
         resetQueue();
         toggleEnable();
-        Serial.println("off");
+        // Serial.println("off");
       }
   }
 }
@@ -228,10 +227,15 @@ void readUart(){
 }
 
 void loop() {
+  // timer for disabling uart mode automatically after 1 sec of not using it
   disableTimer();
+  // read the rotary encoders for menu
   rotaryMenuLoop();
+  // switches of all ec11 rotary encoders
   overRideSwitches();
+  // read grblHals ouput
   readUart();
+  // stream gcode to grblHal
   processQueue();
 
   static unsigned long timerJog = 0;  // will store last time encoder was read

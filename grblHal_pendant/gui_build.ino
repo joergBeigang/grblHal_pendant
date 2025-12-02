@@ -209,7 +209,7 @@ UiPage confirmHomingPage = {
 
 MenuItem runMenu[] = {
     {.label = "Pause", .x = 3, .y = 60, .action = actionPause, .submenu = nullptr},
-    {.label = "Resume",  .x = 30, .y = 60, .action = actionResume,  .submenu = nullptr},
+    // {.label = "Resume",  .x = 30, .y = 60, .action = actionResume,  .submenu = nullptr},
 };
 
 const int runMenuCount = sizeof(runMenu) / sizeof(MenuItem);
@@ -472,9 +472,32 @@ UiPage setJoystickSpeedPage = {
 };
 
 // *****************************************************
+// probe page
+// probe page = joystick -+ probing commands
+// *****************************************************
+
+
+MenuItem probeMenu[] = {
+    {.label = "Back", .x = 3, .y = 60, .action = actionMenu, .submenu = nullptr},
+    {.label = "OFF",  .x = 33, .y = 60, .action = actionOff,  .submenu = nullptr},
+    {.label = "X",    .x = 55, .y = 60, .action = actionX,    .submenu = nullptr},
+    {.label = "Y",    .x = 70, .y = 60, .action = actionY,    .submenu = nullptr},
+    {.label = "Joystick",  .x = 83,.y = 60, .action = actionJoy,  .submenu = nullptr},
+};
+const int probeMenuCount = sizeof(rootMenu) / sizeof(MenuItem);
+
+UiDynamicItem probeDynamicUi[] = {
+    {"123.123", u8g2_font_4x6_tr, 1, 13, &grblStatus.position[0], nullptr, 3},
+    {"123.123", u8g2_font_4x6_tr, 43,  13, &grblStatus.position[1], nullptr, 3},
+    {"123.123", u8g2_font_4x6_tr, 83,  13, &grblStatus.position[2], nullptr, 3},
+    {"State:",u8g2_font_profont12_tr  , 56, 30, nullptr, &grblStatus.status},
+  };
+
+const int probeDynamicUiCount = sizeof(probeDynamicUi) / sizeof(UiDynamicItem);
+
+
+// *****************************************************
 // current page pointer is what is going to be rendered
 // *****************************************************
 UiPage* currentPage = &rootPage;
 // UiPage* currentPage = &setAxisPage;
-
-

@@ -240,22 +240,22 @@ void joyCalibrateCenter() {
 
 void joyCalibrateUp() {
   joystickCalib.yAxisMax = joyCalibrateRead(int(JOY_Y_PIN));
-  Serial.println(joystickCalib.yAxisMax);
+  // Serial.println(joystickCalib.yAxisMax);
 }
 
 void joyCalibrateDown() {
   joystickCalib.yAxisMin = joyCalibrateRead(int(JOY_Y_PIN));
-  Serial.println(joystickCalib.yAxisMin);
+  // Serial.println(joystickCalib.yAxisMin);
 }
 
 void joyCalibrateLeft() {
   joystickCalib.xAxisMin = joyCalibrateRead(int(JOY_X_PIN));
-  Serial.println(joystickCalib.xAxisMin);
+  // Serial.println(joystickCalib.xAxisMin);
 }
 
 void joyCalibrateRight() {
   joystickCalib.xAxisMax = joyCalibrateRead(int(JOY_X_PIN));
-  Serial.println(joystickCalib.xAxisMax);
+  // Serial.println(joystickCalib.xAxisMax);
   calibrateJoystick();
 }
 

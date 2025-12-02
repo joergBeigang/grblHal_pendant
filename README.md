@@ -1,6 +1,6 @@
 # grblHal_pendant
 
-This is a pendant for grblHal controlled cnc machines.
+This is a simple pendant for grblHal controlled cnc machines.
 It is running on an ESP32. For the analog feel it is using a high resolution
 rotatary encoder (with 1200 pulses per revolution), and an analog joystick for
 rapid movement.
@@ -35,6 +35,7 @@ between the computer and pendant without pressing any buttons.
 ---
 
 ## Building
+
 The code is using the arduino framework, and a few libraries:
 
 - **U8g2lib.h** and **Wire.h** – for the display
@@ -59,5 +60,6 @@ adapted a little, or just 3d print a spacer that goes under the panel.
 ---
 
 ## Disclaimer
+
 Use on your own risk, read the source code first, don't crash the machine or
 even hurt yourself.

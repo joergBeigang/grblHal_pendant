@@ -59,12 +59,12 @@ void sendOverrideCommands(Overrides &ov){
 // setting feed or spindle override via button release back to 100
 void overRideSwitches(){
 	if (buttonFeed.released()) {
-    Serial.println("feed 100");
+    // Serial.println("feed 100");
     uint8_t byteToSend = 0x90;
     Serial2.write(byteToSend); 
   }
 	if (buttonSpindle.released()) {
-    Serial.println("spindle 100");
+    // Serial.println("spindle 100");
     uint8_t byteToSend = 0x99;
     Serial2.write(byteToSend); 
   }
@@ -78,7 +78,7 @@ void rotaryFeedLoop(){
     int dif = movement - rotatryFeedLastPos;
     rotatryFeedLastPos = movement;
     feedOv.difference += dif;
-    Serial.println(feedOv.difference);
+    // Serial.println(feedOv.difference);
   }
   sendOverrideCommands(feedOv);
 }
@@ -114,7 +114,7 @@ void rotarySpindleLoop(){
 // **************
 
 void setValue(){
-  Serial.println("setting value");
+  // Serial.println("setting value");
   int inverter = 1;
   if (MENU_INVERT == 1){
     inverter = -1;
