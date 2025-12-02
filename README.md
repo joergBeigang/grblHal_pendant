@@ -8,9 +8,9 @@ There are in total 3 EC11 rotary encoders with button functionality. Two to dial
 in the feed and spindle overrides, and one for navigating the menu.
 The display is a I2C OLED (SSD1309) with 128x64 pixel resolution.
 I chose those components mostly because I already had them laying around, the
-rotatary encoder came out of an old pendant I made for 8bit grbl, the joystick
+rotatary encoder came out of an old pendant I made for 8bit grbl back then, the joystick
 out of an old rc controller.
-EC11 and the oled display can be ordered dirt cheap from China.
+EC11s and the oled display can be ordered dirt cheap from China.
 
 I am aware that my choice for the encoder for jogging is a little bit
 unconventional, and therefore building a pandent like this is not for everyone,
@@ -31,6 +31,7 @@ smooth.
 
 The UART mode of grblHal is enabled, and disabled automatically. So you can switch
 between the computer and pendant without pressing any buttons.
+GrblHal needs to be configured with UART mode enabled and rt command for switching over.
 
 ---
 
