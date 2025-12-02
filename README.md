@@ -21,7 +21,7 @@ device in a frequency of 10Hz. I figured that is a good frequency to feed
 jogging commands to grbl or grblHal. The revolution of the roatary encoder is
 translated directly into the revolution of my ball screw, so one revolution
 moves the machine be 5mm. 1200 pulses per revolution means that one pulse equals
-0.004166mm movement. With the given time interval of 0.1 seconds the feed is
+0.0042mm movement. With the given time interval of 0.1 seconds the feed is
 easy to calculate and it has the nice side effect that there is no need for any
 stop jog real time commands.
 This gives a pretty secure feeling when jogging.
