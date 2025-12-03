@@ -42,8 +42,6 @@ UiDynamicItem rootDynamicUi[] = {
     {"Feed:", u8g2_font_profont10_tf, 30, 43, &grblStatus.overRides[0], nullptr,0},
     {"Spindle:", u8g2_font_profont10_tf, 110, 43, &grblStatus.overRides[2], nullptr,0},
     {"State:",u8g2_font_profont12_tr  , 56, 30, nullptr, &grblStatus.status},
-    // {"active:",u8g2_font_4x6_tr, 86, 30, &grblStatus.uartMode, nullptr },
-
   };
 
 const int rootDynamicUiCount = sizeof(rootDynamicUi) / sizeof(UiDynamicItem);
@@ -456,7 +454,7 @@ MenuItem setJoystickSpeedMenu[] = {
 const int setJoystickSpeedMenuCount = sizeof(setJoystickSpeedMenu) / sizeof(MenuItem);
 
 UiItem setJoystickSpeedUI[] = {
-    {.label = "Set joystick speed", .font = u8g2_font_profont12_tr, .x = 30, .y = 15},
+    {.label = "Set joystick speed", .font = u8g2_font_profont12_tr, .x = 10, .y = 15},
 };
 const int setJoystickSpeedUICount = sizeof(setJoystickSpeedUI) / sizeof(UiItem);
 

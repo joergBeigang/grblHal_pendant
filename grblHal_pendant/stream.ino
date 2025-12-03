@@ -3,11 +3,10 @@
 /*
  * simple stremaing for all none real time commands being 
  * send to grblHal. 
- * In theory this shouldn't be necessary because we're only 
+ * In theory this shouldn't be necessary to use a queue, because we're only 
  * sending commands that are supposed to be executed within 
  * the timing, but it is the cleaner approach. 
- * It is using a simple send and wait for ok algorythm. The ok boolean 
- * is being set in the main file where UART is being read.
+ *
  */
 
 std::queue<String> grblQueue;
@@ -17,24 +16,32 @@ int state = -1;
 unsigned long t0;
 
 void sendToGrbl(const String &cmd) {
-    grblQueue.push(cmd);
+  grblQueue.push(cmd);
+}
+
+
+void sendBin(uint8_t hex) {
+  DEBUG_PRINT("send hex");
+  DEBUG_PRINTLN(hex);
+  Serial2.write(hex);
 }
 
 // being triggered at max speed
 void processQueue() {
   Scheduler();
   if (!grblQueue.empty()) {
-    if (ok == true && active == true) {
-      ok = false;
+    if (grblStatus.uartMode == true) {
       String cmd = grblQueue.front();   // get oldest
       Serial2.print(cmd);
       grblQueue.pop();                  // remove it
+      DEBUG_PRINT("out of queue");
+      DEBUG_PRINTLN(cmd);
     }
   }
 }
 
 // reset the queue after being stuck for a while
-// the vaiable active is used here. after not triggering any 
+// the vaiable grblStatus.uartMode is used here. after not triggering any 
 // input via encoder or joystick after one second active is set to 
 // false and UART mode is being switched off. 
 // after one second. No extra time needed, the switch off active timer
@@ -43,7 +50,6 @@ void resetQueue() {
     while (!grblQueue.empty()) {
         grblQueue.pop();
     }
-    ok = true;
 }
 
 
@@ -60,7 +66,7 @@ void Scheduler() {
     case 0:
       if (now - t0 >= 200) {
 
-        Serial.println("schedule task1");
+        DEBUG_PRINTLN("schedule task1");
         task1();
         state ++;
         t0 = millis();
@@ -86,28 +92,26 @@ void Scheduler() {
 } 
 
 void task1(){
-  Serial.println("activate");
-  if (active == false) {
+  DEBUG_PRINTLN("activate");
+  if (grblStatus.uartMode == false) {
     toggleEnable();
-    active = true;
 
   }
 }
 void task2(){
-  Serial.println("send command");
-  Serial.println(singleCommand);
+  DEBUG_PRINTLN("send command");
+  DEBUG_PRINTLN(singleCommand);
   sendToGrbl(singleCommand);
 }
 
 void task3(){
-  Serial.println("deactivate");
+  DEBUG_PRINTLN("deactivate");
   toggleEnable();
-  active = false;
 }
 
 
 void sendSingleCommand(String cmd) {
-  Serial.println(cmd);
+  DEBUG_PRINTLN(cmd);
   singleCommand = cmd;
   state = 0;
 }

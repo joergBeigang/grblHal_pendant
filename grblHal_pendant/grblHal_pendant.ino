@@ -19,8 +19,8 @@ Preferences prefs;
 // instace the settings struct
 Settings settings;
 
-// if true = in control via uart
-volatile bool active = false;
+// selected menu item
+int selectedIndex = -1;          // 1 = off is selected on startup
 
 // to keep UART active while
 volatile bool keepActive = false; 
@@ -37,9 +37,6 @@ long timerEncoderRest  = 0;
 
 // position of the cursor in the menu
 int cursorPosition = 0; 
-
-// ok response from grblHAL received
-bool ok = true;
 
 // mode = operation mode
 // 0 - off
@@ -138,14 +135,13 @@ void setup() {
 
   // send real time command 0x8B to enable/disable uart command
 void toggleEnable(){
-  // active = !active;
   uint8_t byteToSend = 0x8B;
   Serial2.write(byteToSend);
   rtCmdTimer = millis();
-  // Serial.println("ENABLE/DISABLE");
-  // Serial.println(active);
+  DEBUG_PRINTLN("ENABLE/DISABLE");
+  DEBUG_PRINTLN(grblStatus.uartMode);
 
-  if (active == true) {
+  if (grblStatus.uartMode == true) {
     timerEncoderRest = millis();
   }
 }
@@ -157,10 +153,10 @@ void disableTimer(){
   long currentMillis = millis();
   if (currentMillis - timerEncoderRest >= 1000) {
   // switch off uart mode
-      if (active == 1){
+      if (grblStatus.uartMode == 1){
         resetQueue();
         toggleEnable();
-        // Serial.println("off");
+        DEBUG_PRINTLN("UAERT off");
       }
   }
 }
@@ -169,19 +165,20 @@ void disableTimer(){
 void modeLogic(){
  switch (mode){
    case 0:
+     if (currentPage == &rootPage) selectedIndex = 1;
      break;
    case 1:
      readJoystick();
      break;
    case 2:
      readJogEncoder(String("X"));
-     // Serial.println("encoder x");
      break;
-   case 3:
+  case 3:
      readJogEncoder(String("Y"));
      break;
-   case 5:
-     currentPage = &runPage;
+  case 5:
+    currentPage = &runPage;
+    cursorPosition = 0;
      break;
  }
 }
@@ -197,12 +194,14 @@ void setMode(){
     mode = 5;
     previousMode = 5;
     currentPage = &runPage;
+    selectedIndex = 1;  // pause button is highlighted
     return;
   } else {
     if (previousMode == 5){
       currentPage = &rootPage;
       // machine just stopped running, go back to previous mode
       mode = 0;
+      selectedIndex = 1; // off is highlighted
       previousMode = 0;
       return;
     }

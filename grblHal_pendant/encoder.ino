@@ -25,7 +25,7 @@ void encoderISR() {   // just remove IRAM_ATTR
 
 // initialize the encoder to avoid unwanted movment when activating
 void initEncoder() {
-  // Serial.println("init encoder");
+  DEBUG_PRINTLN("init encoder");
   lastPos = encoderPos;
 }
 
@@ -34,13 +34,12 @@ void readJogEncoder(String axis){
   static int32_t lastPos = 0;
   // Set active if encoder moved (based on encoderPos change)
   if (lastPos != encoderPos) {
-    // Serial.println("encoder moved");
+    DEBUG_PRINTLN("encoder moved");
     timerEncoderRest = millis();
-    if (active == 0){
-      // Serial.println("active");
+    if (grblStatus.uartMode == 0){
+      DEBUG_PRINTLN("UART active");
       if (millis() - rtCmdTimer < 200) return;
       toggleEnable();
-      active = 1;
     }
     // send jog command
     encoderOut(axis);

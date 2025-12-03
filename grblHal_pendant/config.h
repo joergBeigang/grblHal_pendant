@@ -1,4 +1,5 @@
-
+// set to 0 to disable all debug printing on Serial (usb)
+#define DEBUG 1     
 
 // pins for uart communicatino with grblhal
 #define GRBL_RX 16
@@ -49,3 +50,14 @@
 // 1 = invert is true
 // 0 = invert is false
 #define MENU_INVERT 1
+
+
+
+#if DEBUG
+  #define DEBUG_PRINT(x)     Serial.print(x)
+  #define DEBUG_PRINTLN(x)   Serial.println(x)
+#else
+  #define DEBUG_PRINT(x)
+  #define DEBUG_PRINTLN(x)
+#endif
+

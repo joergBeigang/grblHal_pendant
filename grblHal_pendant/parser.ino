@@ -104,21 +104,17 @@ bool parseGrblOutput(String report) {
     // first check if UAERT is active or not
     int uart =report.indexOf("MPG:0");
     if (uart != -1) {
-      active = false;
+      grblStatus.uartMode = false;
+      DEBUG_PRINTLN("UART OFF");
       grblStatus.uartMode = 0;
     }
     uart =report.indexOf("MPG:1");
     if (uart != -1) {
-      active = true;
+      grblStatus.uartMode = true;
+      DEBUG_PRINTLN("UART ON");
       grblStatus.uartMode = 1;
     }
     return parseGrblStatusReport(report);
-  }
-  // ok check
-  if (report.indexOf("ok") != -1) {
-    ok = true;
-    return true;
-
   }
   // coordinate system
   start = report.indexOf('[');
@@ -129,5 +125,4 @@ bool parseGrblOutput(String report) {
   }
   // check uart mode
   return false;
-
 }

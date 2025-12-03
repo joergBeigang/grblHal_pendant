@@ -7,7 +7,6 @@
 
 int lastValue = 0;
 bool setValueMode = false;
-int selectedIndex = -1;          // 1 = off is selected on startup
 int rotatryMenuLastPos = 0;
 
 // instace stuct with rt commands for overrides
@@ -59,12 +58,12 @@ void sendOverrideCommands(Overrides &ov){
 // setting feed or spindle override via button release back to 100
 void overRideSwitches(){
 	if (buttonFeed.released()) {
-    // Serial.println("feed 100");
+    DEBUG_PRINTLN("feed 100");
     uint8_t byteToSend = 0x90;
     Serial2.write(byteToSend); 
   }
 	if (buttonSpindle.released()) {
-    // Serial.println("spindle 100");
+    DEBUG_PRINTLN("spindle 100");
     uint8_t byteToSend = 0x99;
     Serial2.write(byteToSend); 
   }
@@ -78,7 +77,6 @@ void rotaryFeedLoop(){
     int dif = movement - rotatryFeedLastPos;
     rotatryFeedLastPos = movement;
     feedOv.difference += dif;
-    // Serial.println(feedOv.difference);
   }
   sendOverrideCommands(feedOv);
 }
@@ -95,26 +93,11 @@ void rotarySpindleLoop(){
 }
 
 
-// void rotarySpindleLoop(){
-//   static int rotatrySpindleLastPos = 0;
-//   if (rotarySpindle.encoderChanged()) {
-//     Serial.println("spindle");
-//       int inverter = 1;
-//       int movement = rotarySpindle.readEncoder();  // cumulative steps since last reset
-//       grblStatus.overRides[1] = movement ;
-//       // wrap around
-//
-//       drawScreen(cursorPosition);  // redraw cursor
-//   }
-// }
-//
-
 // **************
 // menu functions
 // **************
 
 void setValue(){
-  // Serial.println("setting value");
   int inverter = 1;
   if (MENU_INVERT == 1){
     inverter = -1;

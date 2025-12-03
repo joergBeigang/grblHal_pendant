@@ -49,17 +49,17 @@ void readJoystick(){
   }
   timerEncoderRest = millis();
   // input, but grblhal isn't listening, switch uart on
-  if (active == false){
+  if (grblStatus.uartMode == false){
     // first check if the last rt command wasn't to recent
     if (millis() - rtCmdTimer < 200) return;
+    DEBUG_PRINTLN("JOYSTICK toggle uart ");
     toggleEnable();
   }
 
   // float vec[3] = {valueX, valueY, valueZ};
   String cmd = jog_build_cmd(valueX, valueY, valueZ);
   if (cmd != ""){
-    // Serial.println(cmd);
-    // Serial2.print(cmd);
+    // DEBUG_PRINTLN(cmd);
     sendToGrbl(cmd);
   }
 }
@@ -110,14 +110,14 @@ float prepareJoystickValue(int ivalue, int minValRaw, int maxValRaw, float cente
     float value = normalize(ivalue, minValRaw, center, maxValRaw);
     value = mapJoystickValue(value, centerZone);
     value = ease_in_blend(value, blend);
-    Serial.print("min: ");
-    Serial.print(minValRaw);
-    Serial.print("max ");
-    Serial.print(maxValRaw);
-    Serial.print("center ");
-    Serial.print(center);
-    Serial.print("final ");
-    Serial.println(value);
+    // DEBUG_PRINT("min: ");
+    // DEBUG_PRINT(minValRaw);
+    // DEBUG_PRINT("max ");
+    // DEBUG_PRINT(maxValRaw);
+    // DEBUG_PRINT("center ");
+    // DEBUG_PRINT(center);
+    // DEBUG_PRINT("final ");
+    // DEBUG_PRINTLN(value);
     value = clampValue(value);
     return value;
 }
@@ -254,22 +254,18 @@ void joyCalibrateCenter() {
 
 void joyCalibrateUp() {
   joystickCalib.yAxisMax = joyCalibrateRead(int(JOY_Y_PIN));
-  // Serial.println(joystickCalib.yAxisMax);
 }
 
 void joyCalibrateDown() {
   joystickCalib.yAxisMin = joyCalibrateRead(int(JOY_Y_PIN));
-  // Serial.println(joystickCalib.yAxisMin);
 }
 
 void joyCalibrateLeft() {
   joystickCalib.xAxisMin = joyCalibrateRead(int(JOY_X_PIN));
-  // Serial.println(joystickCalib.xAxisMin);
 }
 
 bool joyCalibrateRight() {
   joystickCalib.xAxisMax = joyCalibrateRead(int(JOY_X_PIN));
-  // Serial.println(joystickCalib.xAxisMax);
   calibrateJoystick();
   return sanityCheck();
 }
@@ -321,15 +317,15 @@ bool sanityCheck() {
   // DELTA is the minimum difference between min, center and max
   const int DELTA = 600;
   readSettings();
-  Serial.println("check1");
+  DEBUG_PRINTLN("check1");
   if (settings.joystickXMax - settings.joystickXCenter < DELTA) return false;
-  Serial.println("check2");
+  DEBUG_PRINTLN("check2");
   if (settings.joystickXCenter - settings.joystickXMin < DELTA) return false;
-  Serial.println("check3");
+  DEBUG_PRINTLN("check3");
   if (settings.joystickYMax - settings.joystickYCenter < DELTA) return false;
-  Serial.println("check4");
+  DEBUG_PRINTLN("check4");
   if (settings.joystickYCenter - settings.joystickYMin < DELTA) return false;
-  Serial.println("check passed");
+  DEBUG_PRINTLN("check passed");
   return true;
 }
 

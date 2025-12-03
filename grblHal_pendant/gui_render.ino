@@ -24,7 +24,6 @@ void drawPage(const UiPage& page) {
   char buf[24];
   for (int i = 0; i < page.dynCount; i++) {
     UiDynamicItem &item = page.dynItems[i];
-    // Serial.println(item.value)
     u8g2.setFont(item.font);
     //
 

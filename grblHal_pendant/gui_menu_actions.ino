@@ -10,7 +10,7 @@
 // activate UAERT mode and keep it active
 void activateUartMode() {
   keepActive = true;
-  if (active == false) {
+  if (grblStatus.uartMode == false) {
     toggleEnable();
     // active = true;
   }
@@ -42,15 +42,12 @@ void actionSetValue(){
 
 
 void actionCancel(){
-  Serial.println("cancel");
-  Serial.printf("currentPage=%p, parent=%p\n", currentPage, currentPage->parent);
-  Serial.println("cancel");
   valueEdit = 0;
   // currentPage = &rootPage;
   currentPage = currentPage -> parent;
-  selectedIndex = -1;
+  // select "OFF" on the display
+  selectedIndex = 1;
   keepActive = false;
-  // nextPage = &rootPage;
 }
 
 
@@ -106,8 +103,7 @@ void actionXPos() {
   selectedIndex = -1;
   activateUartMode();
   uint8_t request = 0x83; 
-  Serial2.write(request);
-      
+  sendBin(request);
 }
 
 void actionYPos() {
@@ -119,7 +115,7 @@ void actionYPos() {
   Serial.println("action");
   activateUartMode();
   uint8_t request = 0x83; 
-  Serial2.write(request);
+  sendBin(request);
 }
 void actionZPos() {
   mode = 0;
@@ -130,7 +126,7 @@ void actionZPos() {
   mode = 0;
   activateUartMode();
   uint8_t request = 0x83; 
-  Serial2.write(request);
+  sendBin(request);
 }
 
 
@@ -198,7 +194,7 @@ void actionReset() {
   selectedIndex = 1;
   mode = 0;
   uint8_t reset = 0x18; 
-  Serial2.write(reset);
+  sendBin(reset);
   keepActive = false;
 }
 
@@ -224,14 +220,15 @@ void actionEnterSettings(){
 // *****************************************************
 void actionPause(){
   uint8_t feedHold = 0x82;
-  Serial2.write(feedHold);
+  DEBUG_PRINTLN("pause sent");
+  sendBin(feedHold);
   mode = 5;
 }
 
 void actionResume(){
   // if (mode == 5) return;
   uint8_t cycleStart = 0x81;
-  Serial2.write(cycleStart);
+  sendBin(cycleStart);
   mode = 5;
 }
 
@@ -247,7 +244,7 @@ void actionStopMenu(){
 
 void actionStop(){
   uint8_t stop = 0x88; 
-  Serial2.write(stop);
+  sendBin(stop);;
   mode = 0;
   currentPage = &rootPage;
 }

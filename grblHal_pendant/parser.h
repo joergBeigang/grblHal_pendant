@@ -11,7 +11,7 @@ struct GrblStatus {
   float overRides[3];
   float position[MAX_AXIS];
   int coordinateSystem;
-  float uartMode;
+  bool uartMode;
 };
 bool parseGrblStatusReport(String report);
 bool parseGrblOutput(String report);
