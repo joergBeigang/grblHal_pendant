@@ -284,28 +284,15 @@ int joyCalibrateRead(int pin) {
         readings[i] = analogRead(pin);
         delay(2); // let joystick settle
     }
-
     // get median
     int sorted[N];
     memcpy(sorted, readings, sizeof(readings));
     std::sort(sorted, sorted + N);
     int median = sorted[N/2];
 
-    // finally get rid of spikes
-    uint32_t r = 0;
-    int count = 0;
-    for (int i = 0; i < N; i++) {
-        if (abs(readings[i] - median) <= 10) { 
-            r += readings[i];
-            count++;
-        }
-    }
-
-    if (count == 0) return median; // fallback
-
     Serial.print("value ");
-    Serial.println(int(float(r)/count));
-    return int(float(r) / count);
+    Serial.println(median);
+    return median;
 }
 
 void calibrateJoystick() {
