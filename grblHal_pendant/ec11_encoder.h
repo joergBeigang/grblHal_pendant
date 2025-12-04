@@ -17,4 +17,7 @@ struct Overrides {
   uint8_t cmdOneMinus;
   uint8_t cmdTenMinus;
 };
+extern float valueEditIncrement;
+extern float valueEditMin;
+extern float valueEditMax;
 #endif

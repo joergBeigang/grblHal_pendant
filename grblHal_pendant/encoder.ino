@@ -63,7 +63,8 @@ void encoderOut(String axis) {
 
 // builds the command with correct feedrate
 String calculateCmd(float mm, String axis){
-  float feed = abs(mm * (60000 / float(interval)))*1.2;
+  // float feed = abs(mm * (60000 / float(interval)))*1.2;
+  float feed = abs(mm * (60000 / float(interval)));
   String cmd = "$J=G91 ";
   cmd += axis;
   cmd += mm;

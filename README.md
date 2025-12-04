@@ -38,6 +38,35 @@ In the hardware folder is a schematic and CAD files of the case. I am using 3mm 
 
 And yes, the case is quite big — that's because I'm not a big fan of handheld devices. I prefer it mounted to the CNC so I have one hand free to slide a parallel around on the work piece or similar.
 
+List of components:
+
+1 rotary encoder LPD3806-600BM-G5-24G (rated for 5-24v, but works fine with 3v3)
+3 rootary encoders EC11
+1 OLED display 128x64 pixel I2C with SSD1309 driver
+1 analog joystick
+1 ESP32 Development board 
+cables and connectors
+
+---
+
+## USE
+
+All the pins, the pulses per revolution of the rotary encoder for jogging and the distance pro revolution are set in config.h.
+When it's all connected, and the firmware is flashed the display should show up. 
+It needs to be setup in Menu -> Settings:
+
+
+- Joystick settings
+  - Calibrate Joystick - calibration process for the analog joystick 
+  - joystick invert X, Y - invert the axis
+  - set joystick speed - it is not a real world unit. Standard is 3, 5 gives you about 4200 mm/min feed when jogging full speed in xy direction (diagonal), if Z is moved simultaneous, the feed is higher.
+
+- Encoder settings - invert X, Z and Z
+- delay compensation - compensates for delay (processing, acceleration). smaller value give a directer control, less overshoot, higher value smoother movement in higher speeds. Default is 0, values like 0.1 to 0.25 can smoothen joystick jogging
+
+
+- **Button.h** and **AiEsp32RotaryEncoder.h** – for the buttons of the EC11 encoders  
+
 ---
 
 ## Disclaimer

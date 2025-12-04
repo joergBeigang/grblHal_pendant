@@ -46,7 +46,11 @@ void actionCancel(){
   // currentPage = &rootPage;
   currentPage = currentPage -> parent;
   // select "OFF" on the display
-  selectedIndex = 1;
+  if (currentPage == &rootPage) {
+    selectedIndex = 1;
+  } else {
+    selectedIndex = -1;
+  }
   keepActive = false;
 }
 
@@ -96,6 +100,9 @@ void actionJoy() {
 // *****************************************************
 
 void actionXPos() {
+  valueEditIncrement = .1;
+  valueEditMin = -99999;
+  valueEditMax = 99999;
   mode = 0;
   currentPage = &setAxisXPage;
   // request the active coordinate system
@@ -107,17 +114,22 @@ void actionXPos() {
 }
 
 void actionYPos() {
+  valueEditIncrement = .1;
+  valueEditMin = -99999;
+  valueEditMax = 99999;
   mode = 0;
   currentPage = &setAxisYPage;
   // request the active coordinate system
   cursorPosition = 0;
   selectedIndex = -1;
-  Serial.println("action");
   activateUartMode();
   uint8_t request = 0x83; 
   sendBin(request);
 }
 void actionZPos() {
+  valueEditIncrement = .1;
+  valueEditMin = -99999;
+  valueEditMax = 99999;
   mode = 0;
   currentPage = &setAxisZPage;
   // request the active coordinate system
@@ -134,6 +146,9 @@ void actionZPos() {
 // actions for set x axis
 // **********************
 void actionSetAxisX(){
+  valueEditIncrement = .1;
+  valueEditMin = -99999;
+  valueEditMax = 99999;
   setAxisToValue("X");
   valueEdit = 0;
   currentPage = &rootPage;
@@ -146,6 +161,9 @@ void actionSetAxisX(){
 // actions for set y axis
 // **********************
 void actionSetAxisY(){
+  valueEditIncrement = .1;
+  valueEditMin = -99999;
+  valueEditMax = 99999;
   setAxisToValue("Y");
   valueEdit = 0;
   currentPage = &rootPage;
@@ -158,6 +176,9 @@ void actionSetAxisY(){
 // actions for set x axis
 // **********************
 void actionSetAxisZ(){
+  valueEditIncrement = .1;
+  valueEditMin = -99999;
+  valueEditMax = 99999;
   setAxisToValue("Z");
   valueEdit = 0;
   currentPage = &rootPage;
@@ -214,6 +235,23 @@ void actionEnterSettings(){
   selectedIndex = -1;
 }
 
+// *****************************************************
+// actions settings menu
+// *****************************************************
+
+void actionEnterJoystickSettings(){
+  currentPage = &settingsJoystickPage;
+  cursorPosition = 0;
+  mode = 0;
+  selectedIndex = -1;
+}
+
+void actionEnterEncoderSettings(){
+  currentPage = &settingsEncoderPage;
+  cursorPosition = 0;
+  mode = 0;
+  selectedIndex = -1;
+}
 
 // *****************************************************
 // actions for run mode
@@ -325,4 +363,59 @@ void actionSetJoystickSpeed(){
   cursorPosition = 0;
   mode = 0;
   selectedIndex = -1;
+  valueEditIncrement = .1;
+  valueEditMin = -99999;
+  valueEditMax = 99999;
 }
+// ********************************
+// encoder Settings
+// ********************************
+
+void actionEncInvertX(){
+  prefs.putBool("encInvX", !settings.encoderInvertX);
+  readSettings();
+  currentPage = &rootPage;
+}
+
+void actionEncInvertY(){
+  prefs.putBool("encInvY", !settings.encoderInvertY);
+  readSettings();
+  currentPage = &rootPage;
+}
+
+void actionEncInvertZ(){
+  prefs.putBool("encInvZ", !settings.encoderInvertZ);
+  readSettings();
+  currentPage = &rootPage;
+}
+
+void actionEnterAccCmp(){
+  currentPage = &setAccCmpPage;
+  // adjust value edit values
+  readSettings();
+  valueEditMax = 5;
+  valueEditMin = 0;
+  valueEditIncrement = .01;
+  valueEdit = settings.accCompensation;
+
+  cursorPosition = 0;
+  mode = 0;
+  selectedIndex = -1;
+}
+
+void actionSetAccCmp(){
+  if (valueEdit < 0) {
+    valueEdit = 0;
+  }
+  prefs.putFloat("accCmp", valueEdit);
+  readSettings();
+  // setting back to standard
+  valueEditIncrement = .1;
+  valueEditMin = -99999;
+  valueEditMax = 99999;
+  currentPage = &settingsPage;
+  cursorPosition = 0;
+  mode = 0;
+  selectedIndex = -1;
+}
+

@@ -10,9 +10,13 @@ struct Settings {
   int joystickYMax;
   int joystickXMin;
   int joystickYMin;
-  int joystickInvertX;
-  int joystickInvertY;
+  bool joystickInvertX;
+  bool joystickInvertY;
   float joystickSpeed;
+  bool encoderInvertX;
+  bool encoderInvertY;
+  bool encoderInvertZ;
+  float accCompensation;
 };
 
 void readSettings();

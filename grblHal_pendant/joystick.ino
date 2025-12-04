@@ -58,6 +58,7 @@ void readJoystick(){
 
   // float vec[3] = {valueX, valueY, valueZ};
   String cmd = jog_build_cmd(valueX, valueY, valueZ);
+  // DEBUG_PRINTLN(cmd);
   if (cmd != ""){
     // DEBUG_PRINTLN(cmd);
     sendToGrbl(cmd);
@@ -194,7 +195,7 @@ String jog_build_cmd(float x, float y, float z){
   String cmd  = "$J=G91";
   // float feed2d = calculateFeed(mag2d);
   const long interval = float(SEND_INTERVAL);         // interval for sending jog commands in milliseconds
-  float feed = abs(mag3d * (60000/interval));
+  float feed = abs(mag3d * (60000/interval)) * (1 - settings.accCompensation);
 
   if (x != 0){
     cmd = cmd + " X" + String(x, 3);

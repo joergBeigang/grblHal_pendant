@@ -272,10 +272,9 @@ UiPage confirmStopPage = {
 
 MenuItem settingsMenu[] = {
     {.label = "Back", .x = 10,  .y = 10, .action = actionCancel, .submenu = nullptr },
-    {.label = "calibrate joystick", .x = 10,  .y = 23, .action = actionEnterCalibrate, .submenu = nullptr },
-    {.label = "joystick invert X", .x = 10, .y = 36, .action = actionInvertX, .submenu = nullptr},
-    {.label = "joystick invert Y",  .x = 10, .y = 49, .action = actionInvertY,  .submenu = nullptr},
-    {.label = "set joystick speed",  .x = 10, .y = 62, .action = actionEnterJoystickSpeed,  .submenu = nullptr},
+    {.label = "joystick settings", .x = 10,  .y = 23, .action = actionEnterJoystickSettings, .submenu = nullptr },
+    {.label = "encoder settings", .x = 10, .y = 36, .action = actionEnterEncoderSettings, .submenu = nullptr},
+    {.label = "delay compensation",  .x = 10, .y = 49, .action = actionEnterAccCmp,  .submenu = nullptr},
 };
 const int settingsMenuCount = sizeof(settingsMenu) / sizeof(MenuItem);
 
@@ -424,7 +423,7 @@ MenuItem joystickStartupMenu[] = {
 const int joystickStartupMenuCount= sizeof(joystickStartupMenu) / sizeof(MenuItem);
 
 UiItem joystickStartupUi[] = {
-    {.label = "Joystick needs to be calibrated", .font = u8g2_font_4x6_tr, .x = 5, .y = 15},
+    {.label = "Joystick needs to be calibrated", .font = u8g2_font_4x6_tr, .x = 1, .y = 15},
   };
 const int joystickStartupUiCount = sizeof(joystickStartupUi) / sizeof(UiItem);
 
@@ -454,7 +453,7 @@ MenuItem setJoystickSpeedMenu[] = {
 const int setJoystickSpeedMenuCount = sizeof(setJoystickSpeedMenu) / sizeof(MenuItem);
 
 UiItem setJoystickSpeedUI[] = {
-    {.label = "Set joystick speed", .font = u8g2_font_profont12_tr, .x = 10, .y = 15},
+    {.label = "Set joystick speed", .font = u8g2_font_profont10_tr, .x = 10, .y = 15},
 };
 const int setJoystickSpeedUICount = sizeof(setJoystickSpeedUI) / sizeof(UiItem);
 
@@ -469,31 +468,86 @@ UiPage setJoystickSpeedPage = {
   &rootPage
 };
 
+
 // *****************************************************
-// WIP status
-//
-// probe page
-// probe page = joystick -+ probing commands
+// settings joystick page
 // *****************************************************
 
-
-MenuItem probeMenu[] = {
-    {.label = "Back", .x = 3, .y = 60, .action = actionMenu, .submenu = nullptr},
-    {.label = "OFF",  .x = 33, .y = 60, .action = actionOff,  .submenu = nullptr},
-    {.label = "X",    .x = 55, .y = 60, .action = actionX,    .submenu = nullptr},
-    {.label = "Y",    .x = 70, .y = 60, .action = actionY,    .submenu = nullptr},
-    {.label = "Joystick",  .x = 83,.y = 60, .action = actionJoy,  .submenu = nullptr},
+MenuItem settingsJoystickMenu[] = {
+    {.label = "Back", .x = 10,  .y = 10, .action = actionCancel, .submenu = nullptr },
+    {.label = "calibrate joystick", .x = 10,  .y = 23, .action = actionEnterCalibrate, .submenu = nullptr },
+    {.label = "joystick invert X", .x = 10, .y = 36, .action = actionInvertX, .submenu = nullptr},
+    {.label = "joystick invert Y",  .x = 10, .y = 49, .action = actionInvertY,  .submenu = nullptr},
+    {.label = "set joystick speed",  .x = 10, .y = 62, .action = actionEnterJoystickSpeed,  .submenu = nullptr},
 };
-const int probeMenuCount = sizeof(rootMenu) / sizeof(MenuItem);
+const int settingsJoystickMenuCount = sizeof(settingsJoystickMenu) / sizeof(MenuItem);
 
-UiDynamicItem probeDynamicUi[] = {
-    {"123.123", u8g2_font_4x6_tr, 1, 13, &grblStatus.position[0], nullptr, 3},
-    {"123.123", u8g2_font_4x6_tr, 43,  13, &grblStatus.position[1], nullptr, 3},
-    {"123.123", u8g2_font_4x6_tr, 83,  13, &grblStatus.position[2], nullptr, 3},
-    {"State:",u8g2_font_profont12_tr  , 56, 30, nullptr, &grblStatus.status},
-  };
 
-const int probeDynamicUiCount = sizeof(probeDynamicUi) / sizeof(UiDynamicItem);
+UiPage settingsJoystickPage = {
+  "settings",
+  settingsJoystickMenu,
+  settingsJoystickMenuCount,
+  emptyUI,
+  0,
+  emptyDynUI,
+  0,
+  &settingsPage
+};
+
+
+// *****************************************************
+// settings encoder page
+// *****************************************************
+
+
+MenuItem settingsEncoderMenu[] = {
+    {.label = "Back", .x = 10,  .y = 10, .action = actionCancel, .submenu = nullptr },
+    {.label = "Encoder invert X", .x = 10,  .y = 23, .action = actionEnterCalibrate, .submenu = nullptr },
+    {.label = "Encoder invert Y", .x = 10, .y = 36, .action = actionInvertX, .submenu = nullptr},
+    {.label = "Encoder invert Z",  .x = 10, .y = 49, .action = actionInvertY,  .submenu = nullptr},
+};
+const int settingsEncoderMenuCount = sizeof(settingsEncoderMenu) / sizeof(MenuItem);
+
+
+UiPage settingsEncoderPage = {
+  "settings",
+  settingsEncoderMenu,
+  settingsEncoderMenuCount,
+  emptyUI,
+  0,
+  emptyDynUI,
+  0,
+  &settingsPage
+};
+
+// *****************************************************
+// setAccCmpPage
+// *****************************************************
+
+MenuItem setAccCmpMenu[] = {
+    {.label = "123.123", .x = 40,  .y = 33, .action = actionSetValue, .submenu = nullptr, .value = pValueEdit},
+    // {.label = "0.0", .x = 40, .y = 30, .action = actionSetValue, .submenu = nullptr},
+    {.label = "Cancel", .x = 3, .y = 60, .action = actionCancel, .submenu = nullptr},
+    {.label = "Set",  .x = 50, .y = 60, .action = actionSetAccCmp,  .submenu = nullptr},
+};
+const int setAccCmpMenuCount = sizeof(setAccCmpMenu) / sizeof(MenuItem);
+
+UiItem setAccCmpUI[] = {
+    {.label = "Set delay compensation", .font = u8g2_font_profont10_tr, .x = 1, .y = 15},
+};
+const int setAccCmpUICount = sizeof(setJoystickSpeedUI) / sizeof(UiItem);
+
+UiPage setAccCmpPage = {
+  "Set Speed",
+  setAccCmpMenu,
+  setAccCmpMenuCount,
+  setAccCmpUI,
+  setAccCmpUICount,
+  emptyDynUI,
+  0,
+  &settingsPage
+};
+
 
 
 // *****************************************************

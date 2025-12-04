@@ -8,6 +8,9 @@
 int lastValue = 0;
 bool setValueMode = false;
 int rotatryMenuLastPos = 0;
+float valueEditIncrement = .1;
+float valueEditMin = -9999;
+float valueEditMax = 9999;
 
 // instace stuct with rt commands for overrides
 Overrides feedOv = {0, 0x93, 0x91, 0x94, 0x92};
@@ -104,7 +107,9 @@ void setValue(){
   }
     int movement = rotaryMenu.readEncoder();  // cumulative steps since last reset
                                               // S
-    valueEdit = float((movement * 0.1)*inverter);
+    valueEdit = float((movement * valueEditIncrement)*inverter);
+    if (valueEdit < valueEditMin) valueEdit = valueEditMin;
+    if (valueEdit > valueEditMax) valueEdit = valueEditMax;
 }
 
 void moveCursor(){
