@@ -222,17 +222,6 @@ float calculateFeed(float value){
     return (max_feed * abs(value));
 }
 
-// clculate the distance to move based on feed rate and the reaction time of
-// grblHal (float dt = .2)
-float calculateDistance(float value, float feed){ 
-    // calculate distance
-    float dt = 0.2;
-    float distance = (feed / 60) * dt;
-    if (value < 0){
-        distance = distance * -1;
-    }
-    return distance;
-}
 
 // ******************************
 // joystick calibration functions
