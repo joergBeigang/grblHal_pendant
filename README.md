@@ -34,18 +34,20 @@ Pin assignments and the definition of the pulses per revolution of the rotary en
 
 ## Hardware
 
+![components](hardware/pictures/components.jpg)
+
 In the hardware folder is a schematic and CAD files of the case. I am using 3mm alu dipond as front panel (again, because I found some in my garage). 3mm is a pretty unusual thickness for front panels, so most likely the model needs to be adapted a little, or just 3D-print a spacer that goes under the panel.
 
 And yes, the case is quite big — that's because I'm not a big fan of handheld devices. I prefer it mounted to the CNC so I have one hand free to slide a parallel around on the work piece or similar.
 
 List of components:
 
-1 rotary encoder LPD3806-600BM-G5-24G (rated for 5-24v, but works fine with 3v3)
-3 rootary encoders EC11
-1 OLED display 128x64 pixel I2C with SSD1309 driver
-1 analog joystick
-1 ESP32 Development board 
-cables and connectors
+- 1 rotary encoder LPD3806-600BM-G5-24G (rated for 5-24v, but works fine with 3v3)
+- 3 rootary encoders EC11
+- 1 OLED display 128x64 pixel I2C with SSD1309 driver
+- 1 analog joystick
+- 1 ESP32 Development board
+- cables and connectors
 
 ---
 
