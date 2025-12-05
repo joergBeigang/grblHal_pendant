@@ -8,7 +8,7 @@ I chose those components mostly because I already had them laying around — the
 
 I am aware that my choice for the encoder for jogging is a little bit unconventional, and therefore building a pendant like this is not for everyone, but at least some code snippets might be useful for others.
 
-All the jogging, regardless if joystick or encoder, is done by reading the input device at a frequency of 10Hz. I figured that is a good frequency to feed jogging commands to grbl or grblHal. The revolution of the rotary encoder is translated directly into the revolution of my ball screw, so one revolution moves the machine by 5mm. 1200 pulses per revolution means that one pulse equals 0.0042mm movement. With the given time interval of 0.1 seconds the feed is easy to calculate and it has the nice side effect that there is no need for any stop-jog real-time commands. This gives a pretty secure feeling when jogging.
+All the jogging, regardless if joystick or encoder, is done by reading the input device at a frequency of 10Hz. I figured that is a good frequency to feed jogging commands to grbl or grblHal. The revolution of the rotary encoder is translated directly into the revolution of my ball screw, so one revolution moves the machine by 5mm. 1200 edges per revolution means that one pulse equals 0.0042mm movement. With the given time interval of 0.1 seconds the feed is easy to calculate and it has the nice side effect that there is no need for any stop-jog real-time commands. This gives a pretty secure feeling when jogging.
 
 I personally often like to touch off with a running spindle, when preparing stock with an indexed end mill for example. And like this, this feels really smooth.
 
