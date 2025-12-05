@@ -42,12 +42,12 @@ And yes, the case is quite big — that's because I'm not a big fan of handheld 
 
 List of components:
 
-1 rotary encoder LPD3806-600BM-G5-24G (rated for 5-24v, but works fine with 3v3)
-3 rootary encoders EC11
-1 OLED display 128x64 pixel I2C with SSD1309 driver
-1 analog joystick
-1 ESP32 Development board 
-cables and connectors
+- 1 rotary encoder LPD3806-600BM-G5-24G (rated for 5-24v, but works fine with 3v3)
+- 3 rootary encoders EC11
+- 1 OLED display 128x64 pixel I2C with SSD1309 driver
+- 1 analog joystick
+- 1 ESP32 Development board
+- cables and connectors
 
 ---
 
