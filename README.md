@@ -1,5 +1,5 @@
 # grblHal_pendant
-
+![pic1](hardware/pictures/pic1.jpg)
 This is a simple pendant for grblHal controlled cnc machines. It is running on an ESP32. For the analog feel it is using a high resolution rotary encoder (with 1200 pulses per revolution), and an analog joystick for rapid movement.
 
 There are in total 3 EC11 rotary encoders with button functionality. Two to dial in the feed and spindle overrides, and one for navigating the menu. The display is a I2C OLED (SSD1309) with 128x64 pixel resolution.
