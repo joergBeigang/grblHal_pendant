@@ -16,6 +16,7 @@ int state = -1;
 unsigned long t0;
 
 void sendToGrbl(const String &cmd) {
+  DEBUG_PRINTLN(cmd);
   grblQueue.push(cmd);
 }
 
