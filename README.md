@@ -1,6 +1,6 @@
 # grblHal_pendant
 ![pic1](hardware/pictures/pic1.jpg)
-This is a simple pendant for grblHal controlled cnc machines. It is running on an ESP32. For the analog feel it is using a high resolution rotary encoder (with 1200 pulses per revolution), and an analog joystick for rapid movement.
+This is a simple pendant for [grblHal](https://github.com/grblHAL/core) controlled cnc machines. It is running on an ESP32. For the analog feel it is using a high resolution rotary encoder (with 600 pulses per revolution), and an analog joystick for rapid movement.
 
 There are in total 3 EC11 rotary encoders with button functionality. Two to dial in the feed and spindle overrides, and one for navigating the menu. The display is a I2C OLED (SSD1309) with 128x64 pixel resolution.
 
@@ -8,7 +8,7 @@ I chose those components mostly because I already had them laying around — the
 
 I am aware that my choice for the encoder for jogging is a little bit unconventional, and therefore building a pendant like this is not for everyone, but at least some code snippets might be useful for others.
 
-All the jogging, regardless if joystick or encoder, is done by reading the input device at a frequency of 10Hz. I figured that is a good frequency to feed jogging commands to grbl or grblHal. The revolution of the rotary encoder is translated directly into the revolution of my ball screw, so one revolution moves the machine by 5mm. 1200 pulses per revolution means that one pulse equals 0.0042mm movement. With the given time interval of 0.1 seconds the feed is easy to calculate and it has the nice side effect that there is no need for any stop-jog real-time commands. This gives a pretty secure feeling when jogging.
+All the jogging, regardless if joystick or encoder, is done by reading the input device at a frequency of 10Hz. I figured that is a good frequency to feed jogging commands to grbl or grblHal. The revolution of the rotary encoder is translated directly into the revolution of my ball screw, so one revolution moves the machine by 5mm. 1200 edges per revolution means that one pulse equals 0.0042mm movement. With the given time interval of 0.1 seconds the feed is easy to calculate and it has the nice side effect that there is no need for any stop-jog real-time commands. This gives a pretty secure feeling when jogging.
 
 I personally often like to touch off with a running spindle, when preparing stock with an indexed end mill for example. And like this, this feels really smooth.
 
@@ -43,7 +43,7 @@ And yes, the case is quite big — that's because I'm not a big fan of handheld 
 List of components:
 
 - 1 rotary encoder LPD3806-600BM-G5-24G (rated for 5-24v, but works fine with 3v3)
-- 3 rootary encoders EC11
+- 3 rotary encoders EC11
 - 1 OLED display 128x64 pixel I2C with SSD1309 driver
 - 1 analog joystick
 - 1 ESP32 Development board
