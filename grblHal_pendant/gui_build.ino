@@ -25,9 +25,9 @@ MenuItem rootMenu[] = {
     {.label = "X",    .x = 55, .y = 60, .action = actionX,    .submenu = nullptr},
     {.label = "Y",    .x = 70, .y = 60, .action = actionY,    .submenu = nullptr},
     {.label = "Joystick",  .x = 83,.y = 60, .action = actionJoy,  .submenu = nullptr},
-    {.label = "123.123", .x = 1,  .y = 13, .action = actionXPos, .submenu = nullptr, .value = &grblStatus.position[0]},
-    {.label = "123.123", .x = 43, .y = 13, .action = actionYPos, .submenu = nullptr, .value = &grblStatus.position[1]},
-    {.label = "123.123", .x = 83, .y = 13, .action = actionZPos, .submenu = nullptr, .value = &grblStatus.position[2]},
+    {.label = "-999.999", .x = 1,  .y = 13, .action = actionXPos, .submenu = nullptr, .value = &grblStatus.position[0]},
+    {.label = "-999.999", .x = 43, .y = 13, .action = actionYPos, .submenu = nullptr, .value = &grblStatus.position[1]},
+    {.label = "-999.999", .x = 84, .y = 13, .action = actionZPos, .submenu = nullptr, .value = &grblStatus.position[2]},
 };
 const int rootMenuCount = sizeof(rootMenu) / sizeof(MenuItem);
 
@@ -272,9 +272,10 @@ UiPage confirmStopPage = {
 
 MenuItem settingsMenu[] = {
     {.label = "Back", .x = 10,  .y = 10, .action = actionCancel, .submenu = nullptr },
-    {.label = "joystick settings", .x = 10,  .y = 23, .action = actionEnterJoystickSettings, .submenu = nullptr },
-    {.label = "encoder settings", .x = 10, .y = 36, .action = actionEnterEncoderSettings, .submenu = nullptr},
-    {.label = "delay compensation",  .x = 10, .y = 49, .action = actionEnterAccCmp,  .submenu = nullptr},
+    {.label = "calibrate joystick", .x = 10,  .y = 23, .action = actionEnterCalibrate, .submenu = nullptr },
+    {.label = "joystick settings", .x = 10,  .y = 36, .action = actionEnterJoystickSettings, .submenu = nullptr },
+    {.label = "encoder settings", .x = 10, .y = 49, .action = actionEnterEncoderSettings, .submenu = nullptr},
+    {.label = "delay compensation",  .x = 10, .y = 62, .action = actionEnterAccCmp,  .submenu = nullptr},
 };
 const int settingsMenuCount = sizeof(settingsMenu) / sizeof(MenuItem);
 
@@ -468,6 +469,34 @@ UiPage setJoystickSpeedPage = {
   &rootPage
 };
 
+// *****************************************************
+// set joystick dead zone page
+// *****************************************************
+
+MenuItem setJoystickDeadMenu[] = {
+    {.label = "123.123", .x = 40,  .y = 33, .action = actionSetValue, .submenu = nullptr, .value = pValueEdit},
+    // {.label = "0.0", .x = 40, .y = 30, .action = actionSetValue, .submenu = nullptr},
+    {.label = "Cancel", .x = 3, .y = 60, .action = actionCancel, .submenu = nullptr},
+    {.label = "Set",  .x = 50, .y = 60, .action = actionSetJoystickDead,  .submenu = nullptr},
+};
+const int setJoystickDeadMenuCount = sizeof(setJoystickDeadMenu) / sizeof(MenuItem);
+
+UiItem setJoystickDeadUI[] = {
+    {.label = "Set joystick dead zone", .font = u8g2_font_profont10_tr, .x = 10, .y = 15},
+};
+const int setJoystickDeadUICount = sizeof(setJoystickDeadUI) / sizeof(UiItem);
+
+UiPage setJoystickDeadPage = {
+  "Set Speed",
+  setJoystickDeadMenu,
+  setJoystickDeadMenuCount,
+  setJoystickDeadUI,
+  setJoystickDeadUICount,
+  emptyDynUI,
+  0,
+  &rootPage
+};
+
 
 // *****************************************************
 // settings joystick page
@@ -475,10 +504,12 @@ UiPage setJoystickSpeedPage = {
 
 MenuItem settingsJoystickMenu[] = {
     {.label = "Back", .x = 10,  .y = 10, .action = actionCancel, .submenu = nullptr },
-    {.label = "calibrate joystick", .x = 10,  .y = 23, .action = actionEnterCalibrate, .submenu = nullptr },
-    {.label = "joystick invert X", .x = 10, .y = 36, .action = actionInvertX, .submenu = nullptr},
-    {.label = "joystick invert Y",  .x = 10, .y = 49, .action = actionInvertY,  .submenu = nullptr},
-    {.label = "set joystick speed",  .x = 10, .y = 62, .action = actionEnterJoystickSpeed,  .submenu = nullptr},
+    // {.label = "calibrate joystick", .x = 10,  .y = 23, .action = actionEnterCalibrate, .submenu = nullptr },
+    {.label = "joystick invert X", .x = 10, .y = 23, .action = actionInvertX, .submenu = nullptr},
+    {.label = "joystick invert Y",  .x = 10, .y = 36, .action = actionInvertY,  .submenu = nullptr},
+    {.label = "set joystick speed",  .x = 10, .y = 49, .action = actionEnterJoystickSpeed,  .submenu = nullptr},
+    {.label = "set joystick dead zone",  .x = 10, .y = 62, .action = actionEnterJoystickDead,  .submenu = nullptr},
+
 };
 const int settingsJoystickMenuCount = sizeof(settingsJoystickMenu) / sizeof(MenuItem);
 

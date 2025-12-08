@@ -83,9 +83,9 @@ void IRAM_ATTR readEncoderISR() {
 // give grblStatus some initial values not avoid pointer errors
 void initGrblStatus(){
   grblStatus.status = "NONE";
-  grblStatus.position[0] = 990.0;
-  grblStatus.position[1] = 120.0;
-  grblStatus.position[2] = 183.0;
+  grblStatus.position[0] = -331.0;
+  grblStatus.position[1] = -912.0;
+  grblStatus.position[2] = -183.0;
   grblStatus.overRides[0] = 100.0;
   grblStatus.overRides[1] = 100.0;
   grblStatus.overRides[2] = 100.0;
@@ -129,11 +129,13 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(ENCODER_A), encoderISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(ENCODER_B), encoderISR, CHANGE);
   drawScreen(0);
-  // check if there are valid joystick settings set
+
+  // check if there are valid joystick settings set, if not start 
+  // the calibration process
   checkJoystickSettings();
 }
 
-  // send real time command 0x8B to enable/disable uart command
+// send real time command 0x8B to enable/disable uart command
 void toggleEnable(){
   uint8_t byteToSend = 0x8B;
   Serial2.write(byteToSend);
@@ -146,12 +148,15 @@ void toggleEnable(){
   }
 }
 
+// disable UART mode after a defined period without any user 
+// input via joustick or rotatary encoder
 void disableTimer(){
   if (keepActive == true) {
     timerEncoderRest = millis();
   };
   long currentMillis = millis();
-  if (currentMillis - timerEncoderRest >= 1000) {
+
+  if (currentMillis - timerEncoderRest >= CANCEL_UART_TIMER) {
   // switch off uart mode
       if (grblStatus.uartMode == 1){
         resetQueue();
@@ -250,5 +255,4 @@ void loop() {
     // reset the timer
     timerJog = currentMillis;
   }
-
 }
