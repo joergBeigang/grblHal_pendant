@@ -367,6 +367,33 @@ void actionSetJoystickSpeed(){
   valueEditMin = -99999;
   valueEditMax = 99999;
 }
+
+void actionEnterJoystickDead(){
+  currentPage = &setJoystickDeadPage;
+  cursorPosition = 0;
+  mode = 0;
+  selectedIndex = -1;
+  valueEditIncrement = .01;
+  valueEditMin = 0;
+  valueEditMax = 0.9;
+  valueEdit = settings.joystickDeadZone;
+}
+
+void actionSetJoystickDead(){
+  if (valueEdit < 0) {
+    valueEdit = 0;
+  }
+  prefs.putFloat("joyDead", valueEdit);
+  readSettings();
+  currentPage = &settingsPage;
+  cursorPosition = 0;
+  mode = 0;
+  selectedIndex = -1;
+  valueEditIncrement = .1;
+  valueEditMin = -99999;
+  valueEditMax = 99999;
+}
+
 // ********************************
 // encoder Settings
 // ********************************

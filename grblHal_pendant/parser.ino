@@ -96,7 +96,7 @@ int parseCoordinateSystem(String report) {
 }
 
 bool parseGrblOutput(String report) {
-
+  
   // status report check
   int start = report.indexOf('<');
   int end = report.indexOf('>');
