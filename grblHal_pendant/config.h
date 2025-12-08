@@ -1,5 +1,5 @@
 // set to 0 to disable all debug printing on Serial (usb)
-#define DEBUG 1     
+#define DEBUG 1
 
 // pins for uart communicatino with grblhal
 #define GRBL_RX 16
@@ -52,6 +52,10 @@
 #define MENU_INVERT 1
 
 
+// timer for swtiching back from UART mode to normal mode 
+// after last input via joystick or encoder
+// time in milli seconds
+#define CANCEL_UART_TIMER 600
 
 #if DEBUG
   #define DEBUG_PRINT(x)     Serial.print(x)
