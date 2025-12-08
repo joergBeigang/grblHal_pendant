@@ -10,6 +10,7 @@ void readSettings() {
   settings.joystickInvertX = prefs.getBool("joyInvX", false);
   settings.joystickInvertY = prefs.getBool("joyInvY", false);
   settings.joystickSpeed = prefs.getFloat("joySpeed", 3.0);
+  settings.joystickDeadZone = prefs.getFloat("joyDead", 0.15);
   settings.encoderInvertX = prefs.getBool("encInvX", false);
   settings.encoderInvertY = prefs.getBool("encInvY", false);
   settings.encoderInvertZ = prefs.getBool("encInvZ", false);
@@ -27,16 +28,14 @@ bool verifySettings() {
   if (prefs.isKey("joyYMax") == false) return false;
   if (prefs.isKey("joyYMin") == false) return false;
   if (prefs.isKey("joySpeed") == false)  prefs.putFloat("joySpeed", 3.0);
+  if (prefs.isKey("joyDead") == false)  prefs.putFloat("joyDead", 0.15);
   if (prefs.isKey("joyInvX") == false)  prefs.putBool("joyInvX", false);
   if (prefs.isKey("joyInvY") == false) prefs.putBool("joyInvY", false);
-
   if (prefs.isKey("encInvX") == false) prefs.putBool("encInvX", false);
   if (prefs.isKey("encjoyInvY") == false) prefs.putBool("encInvY", false);
   if (prefs.isKey("encjoyInvZ") == false) prefs.putBool("encInvZ", false);
   if (prefs.isKey("encjoyInvZ") == false) prefs.putBool("encInvZ", false);
-
   if (prefs.isKey("accComp") == false)  prefs.putFloat("accCmp", 0.0);
-
   return true;
 }
 

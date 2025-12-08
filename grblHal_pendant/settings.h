@@ -13,6 +13,7 @@ struct Settings {
   bool joystickInvertX;
   bool joystickInvertY;
   float joystickSpeed;
+  float joystickDeadZone;
   bool encoderInvertX;
   bool encoderInvertY;
   bool encoderInvertZ;
