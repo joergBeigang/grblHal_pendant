@@ -25,13 +25,13 @@ void readJoystick(){
   float valueX = prepareJoystickValue(analogRead(JOY_X_PIN),
                                       settings.joystickXMin,
                                       settings.joystickXMax,
-                                      .1,
+                                      settings.joystickDeadZone,
                                       settings.joystickXCenter, 
                                       .8);
   float valueY = prepareJoystickValue(analogRead(JOY_Y_PIN),
                                       settings.joystickYMin,
                                       settings.joystickYMax,
-                                      .15,
+                                      settings.joystickDeadZone,
                                       settings.joystickYCenter,
                                       .8);
   // readJoystickEncoder returns a distance in mm
