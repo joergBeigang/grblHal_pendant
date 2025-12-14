@@ -2,7 +2,6 @@
  * functions for reading rotary encoders
  */
 
-float shortestMove = 0.001;  // the shortest move that is being sent via jog
 volatile int32_t encoderPos = 0;
 String jogAxis = "x";
 long lastPos = 0;           // Changed to non-static for access from main.ino
@@ -54,10 +53,8 @@ void readJogEncoder(String axis){
 void encoderOut(String axis) {
   float difference = lastPos - encoderPos;
   float mm = (difference / (float(PULSES_PER_REVOLUTION) * 2)) * float(MM_PER_REVOLUTION);
-  if (abs(mm) > shortestMove){
-    String cmd = calculateCmd(mm, axis);
-    sendToGrbl(cmd);
-  }
+  String cmd = calculateCmd(mm, axis);
+  sendToGrbl(cmd);
   lastPos = encoderPos;
 }
 
