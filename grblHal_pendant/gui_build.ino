@@ -533,9 +533,9 @@ UiPage settingsJoystickPage = {
 
 MenuItem settingsEncoderMenu[] = {
     {.label = "Back", .x = 10,  .y = 10, .action = actionCancel, .submenu = nullptr },
-    {.label = "Encoder invert X", .x = 10,  .y = 23, .action = actionEnterCalibrate, .submenu = nullptr },
-    {.label = "Encoder invert Y", .x = 10, .y = 36, .action = actionInvertX, .submenu = nullptr},
-    {.label = "Encoder invert Z",  .x = 10, .y = 49, .action = actionInvertY,  .submenu = nullptr},
+    {.label = "Encoder invert X", .x = 10,  .y = 23, .action = actionEncInvertX, .submenu = nullptr },
+    {.label = "Encoder invert Y", .x = 10, .y = 36, .action = actionEncInvertY, .submenu = nullptr},
+    {.label = "Encoder invert Z",  .x = 10, .y = 49, .action = actionEncInvertZ,  .submenu = nullptr},
 };
 const int settingsEncoderMenuCount = sizeof(settingsEncoderMenu) / sizeof(MenuItem);
 

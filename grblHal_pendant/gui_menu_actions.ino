@@ -345,6 +345,12 @@ void actionInvertY(){
   currentPage = &rootPage;
 }
 
+void actionInvertZ(){
+  prefs.putBool("joyInvZ", !settings.joystickInvertY);
+  readSettings();
+  currentPage = &rootPage;
+}
+
 void actionEnterJoystickSpeed(){
   currentPage = &setJoystickSpeedPage;
   cursorPosition = 0;
@@ -400,6 +406,8 @@ void actionSetJoystickDead(){
 
 void actionEncInvertX(){
   prefs.putBool("encInvX", !settings.encoderInvertX);
+  DEBUG_PRINTLN("invertX");
+  DEBUG_PRINTLN(settings.encoderInvertX);
   readSettings();
   currentPage = &rootPage;
 }
