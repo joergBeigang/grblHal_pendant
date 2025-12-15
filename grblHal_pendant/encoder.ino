@@ -32,7 +32,8 @@ void initEncoder() {
 void readJogEncoder(String axis){
   static int32_t lastPos = 0;
   // Set active if encoder moved (based on encoderPos change)
-  if (lastPos != encoderPos) {
+  float mm = readEncoderPos();
+  if (mm != 0) {
     DEBUG_PRINTLN("encoder moved");
     timerEncoderRest = millis();
     if (grblStatus.uartMode == 0){
@@ -41,21 +42,50 @@ void readJogEncoder(String axis){
       toggleEnable();
     }
     // send jog command
-    encoderOut(axis);
-    lastPos = encoderPos;
+    // encoderOut(axis, mm);
+    // lastPos = encoderPos;
+    String cmd = calculateCmd(mm, axis);
+    sendToGrbl(cmd);
   }
+}
+
+// read the encoder and return the distance moved in mm
+float readEncoderPos(){
+
+  if (lastPos!= encoderPos) {
+    // send jog command
+    
+    int difPos= encoderPos - lastPos;
+    lastPos = encoderPos;
+    float mm = calculateEncoderDistance(difPos);
+    return mm;
+  }
+  return 0.0;
+}
+
+// translate the encoder steps into mm distance
+float calculateEncoderDistance(int steps){
+    // one revolution is 10mm
+    // 1200 steps per revolution
+    float neg = 1.0;
+    if (steps < 0){
+      neg = -1.0;
+      steps = abs(steps);
+    }
+    return ((float(steps) / 1200.0) * 5.0) * neg;
 }
 
 /* 
  * reading the encoder position and preparing the jog command.
  * it is triggered every 100ms from the main loop via readJogEncoder()
  */
-void encoderOut(String axis) {
-  float difference = lastPos - encoderPos;
-  float mm = (difference / (float(PULSES_PER_REVOLUTION) * 2)) * float(MM_PER_REVOLUTION);
+// TODO remove function after testing
+void encoderOut(String axis, float mm) {
+  // float difference = lastPos - encoderPos;
+  // float mm = (difference / (float(PULSES_PER_REVOLUTION) * 2)) * float(MM_PER_REVOLUTION);
   String cmd = calculateCmd(mm, axis);
   sendToGrbl(cmd);
-  lastPos = encoderPos;
+  // lastPos = encoderPos;
 }
 
 // builds the command with correct feedrate
@@ -64,7 +94,7 @@ String calculateCmd(float mm, String axis){
   float feed = abs(mm * (60000 / float(interval)));
   String cmd = "$J=G91 ";
   cmd += axis;
-  cmd += mm;
+  cmd += String(mm, 3);
   cmd += " F";
   cmd += feed;
   cmd += "\n";
