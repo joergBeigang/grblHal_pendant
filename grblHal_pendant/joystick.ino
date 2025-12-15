@@ -15,7 +15,8 @@ int difPosJoystick = 0;
 void initJoystick() {
   readSettings();
   resetQueue();
-  lastPosJoystick = encoderPos;
+  // lastPosJoystick = encoderPos;
+  initEncoder();
   difPosJoystick = 0;
 }
 // main function to read the joystick and send jog commands
@@ -35,18 +36,16 @@ void readJoystick(){
                                       settings.joystickYCenter,
                                       .8);
   // readJoystickEncoder returns a distance in mm
-  float valueZ = readJoystickEncoder();
+  float valueZ = readEncoderPos();
   // no input, do nothing.
   if (valueX == 0.0 && valueY == 0.0 && valueZ == 0.0){
     return;
   } 
-  // invert 
-  if (settings.joystickInvertX == true){
-    valueX = -valueX;
-  }
-  if (settings.joystickInvertY == true){
-    valueY = -valueY;
-  }
+  // invert axis according to settings
+  if (settings.joystickInvertX == true) valueX = -valueX;
+  if (settings.joystickInvertY == true) valueY = -valueY;
+  if (settings.encoderInvertZ == true) valueZ = -valueZ;
+
   timerEncoderRest = millis();
   // input, but grblhal isn't listening, switch uart on
   if (grblStatus.uartMode == false){
@@ -66,6 +65,7 @@ void readJoystick(){
 }
 
 // read the encoder and return the distance moved in mm
+// TODO remove after testing
 float readJoystickEncoder(){
   if (lastPosJoystick != encoderPos) {
     // send jog command
