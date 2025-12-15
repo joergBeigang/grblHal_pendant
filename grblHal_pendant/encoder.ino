@@ -10,6 +10,7 @@ const long interval = float(SEND_INTERVAL);         // interval for sending jog 
 
 long timerEncoder = 0;
 
+
 // interrupt based encoder reading
 void encoderISR() {   // just remove IRAM_ATTR
   bool a = digitalRead(ENCODER_A);
@@ -22,11 +23,13 @@ void encoderISR() {   // just remove IRAM_ATTR
   lastB = b;
 }
 
+
 // initialize the encoder to avoid unwanted movment when activating
 void initEncoder() {
   DEBUG_PRINTLN("init encoder");
   lastPos = encoderPos;
 }
+
 
 // run every .1 sec
 void readJogEncoder(String axis){
@@ -34,27 +37,38 @@ void readJogEncoder(String axis){
   // Set active if encoder moved (based on encoderPos change)
   float mm = readEncoderPos();
   if (mm != 0) {
+    // check for invert
+    if (invertAxis(axis) == true) mm = -mm;
     DEBUG_PRINTLN("encoder moved");
+    // deal with uart mode and respect the minimum time span 
+    // between sending real time commands
     timerEncoderRest = millis();
     if (grblStatus.uartMode == 0){
       DEBUG_PRINTLN("UART active");
       if (millis() - rtCmdTimer < 200) return;
       toggleEnable();
     }
-    // send jog command
-    // encoderOut(axis, mm);
-    // lastPos = encoderPos;
+    // build jog command
     String cmd = calculateCmd(mm, axis);
+    // send jog command
     sendToGrbl(cmd);
   }
 }
+
+
+// check the settings if the axis should be inverted
+bool invertAxis(String axis) {
+  if (axis == "X" && settings.encoderInvertX == true) return true;
+  if (axis == "Y" && settings.encoderInvertY == true) return true;
+  if (axis == "Z" && settings.encoderInvertZ == true) return true;
+  return false;
+}
+
 
 // read the encoder and return the distance moved in mm
 float readEncoderPos(){
 
   if (lastPos!= encoderPos) {
-    // send jog command
-    
     int difPos= encoderPos - lastPos;
     lastPos = encoderPos;
     float mm = calculateEncoderDistance(difPos);
@@ -62,6 +76,7 @@ float readEncoderPos(){
   }
   return 0.0;
 }
+
 
 // translate the encoder steps into mm distance
 float calculateEncoderDistance(int steps){
@@ -75,18 +90,6 @@ float calculateEncoderDistance(int steps){
     return ((float(steps) / 1200.0) * 5.0) * neg;
 }
 
-/* 
- * reading the encoder position and preparing the jog command.
- * it is triggered every 100ms from the main loop via readJogEncoder()
- */
-// TODO remove function after testing
-void encoderOut(String axis, float mm) {
-  // float difference = lastPos - encoderPos;
-  // float mm = (difference / (float(PULSES_PER_REVOLUTION) * 2)) * float(MM_PER_REVOLUTION);
-  String cmd = calculateCmd(mm, axis);
-  sendToGrbl(cmd);
-  // lastPos = encoderPos;
-}
 
 // builds the command with correct feedrate
 String calculateCmd(float mm, String axis){

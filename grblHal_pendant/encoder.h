@@ -6,5 +6,6 @@ volatile bool lastB = 0;
 void readJogEncoder(String axis);
 void encoderOut();
 void encoderISR();
+extern float readEncoderPos();
 
 #endif
